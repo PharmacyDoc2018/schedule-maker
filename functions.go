@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 func getCommands() commandMapList {
@@ -17,7 +20,13 @@ func getCommands() commandMapList {
 }
 
 func initREPL() *config {
-	config := &config{}
+	godotenv.Load(".env")
+	pathToSch := os.Getenv("SCH_PATH")
+
+	config := &config{
+		pathToSch: pathToSch,
+	}
+
 	return config
 }
 

@@ -7,7 +7,10 @@ type cliCommand struct {
 }
 
 type config struct {
-	lastInput []string
+	scheduleRows [][]string
+	ordersRows   [][]string
+	lastInput    []string
+	pathToSch    string
 }
 
 type commandMapList map[string]cliCommand
