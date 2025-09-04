@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 type cliCommand struct {
 	name        string
 	description string
@@ -7,10 +11,16 @@ type cliCommand struct {
 }
 
 type config struct {
-	scheduleRows [][]string
-	ordersRows   [][]string
-	lastInput    []string
-	pathToSch    string
+	lastInput   []string
+	pathToSch   string
+	patientList map[string]Patient
 }
 
 type commandMapList map[string]cliCommand
+
+type Patient struct {
+	mrn              string
+	name             string
+	appointmentTimes map[string]time.Time
+	orders           []string
+}

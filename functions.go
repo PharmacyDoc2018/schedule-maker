@@ -27,6 +27,8 @@ func initREPL() *config {
 		pathToSch: pathToSch,
 	}
 
+	config.patientList = map[string]Patient{}
+
 	return config
 }
 
