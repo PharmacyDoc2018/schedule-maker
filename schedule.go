@@ -18,7 +18,7 @@ func initScheduledPatients(c *config) error {
 	}
 
 	fmt.Println("creating patient list...")
-	err = createPatientList(c, scheduleRows, ordersRows)
+	err = c.createPatientList(scheduleRows, ordersRows)
 	if err != nil {
 		return err
 	}
@@ -118,30 +118,79 @@ func pullData(c *config) (scheduleRows, ordersRows [][]string, err error) {
 	return scheduleRows, ordersRows, nil
 }
 
-func createPatientList(c *config, scheduleRows, ordersRows [][]string) error {
+func parseDateTime(apptDateString, apptTimeString string) (time.Time, error) {
 	const timeFormat = "3:04 PM"
+	const dateFormat = "01-02-06"
+
+	apptTime, err := time.Parse(timeFormat, apptTimeString)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	apptDate, err := time.Parse(dateFormat, apptDateString)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	apptDateTime := time.Date(
+		apptDate.Year(),
+		apptDate.Month(),
+		apptDate.Day(),
+		apptTime.Hour(),
+		apptTime.Minute(),
+		0,
+		0,
+		apptDate.Location(),
+	)
+
+	return apptDateTime, nil
+}
+
+func (c *config) createPatient(mrn, name string) error {
+	if _, ok := c.patientList[mrn]; ok {
+		return fmt.Errorf("patient already exists")
+	}
+
+	appointmentTimeMap := make(map[string]time.Time)
+	c.patientList[mrn] = Patient{
+		mrn:              mrn,
+		name:             name,
+		appointmentTimes: appointmentTimeMap,
+		orders:           []string{},
+	}
+
+	return nil
+}
+
+func (c *config) addAppointment(mrn, schedule, date, time string) error {
+	apptDateTime, err := parseDateTime(date, time)
+	if err != nil {
+		return err
+	}
+
+	c.patientList[mrn].appointmentTimes[schedule] = apptDateTime
+	return nil
+}
+
+func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 	for _, row := range scheduleRows[1:] {
 		if _, ok := c.patientList[row[0]]; !ok {
-			apptTime, err := time.Parse(timeFormat, row[5])
-			if err != nil {
-				return err
-			}
-			c.patientList[row[0]] = Patient{
-				mrn:  row[0],
-				name: row[1],
-				appointmentTimes: map[string]time.Time{
-					row[4]: apptTime,
-				},
-				orders: []string{},
-			}
-		} else {
-			apptTime, err := time.Parse(timeFormat, row[5])
-			if err != nil {
-				return err
-			}
-			c.patientList[row[0]].appointmentTimes[row[4]] = apptTime
+			c.createPatient(row[0], row[1])
 		}
+
+		appointments := strings.Split(row[4], "\n")
+		for _, appointment := range appointments {
+			err := c.addAppointment(row[0], appointment, row[2], row[5])
+			if err != nil {
+				return err
+			}
+		}
+
 	}
+
+	//for _, row := range ordersRows[1:] {
+	//
+	//}
 
 	return nil
 }
