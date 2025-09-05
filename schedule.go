@@ -23,11 +23,17 @@ func initScheduledPatients(c *config) error {
 		return err
 	}
 
+	fmt.Println("MRN: ", c.patientList["1003917"].mrn)
+	fmt.Println("Name: ", c.patientList["1003917"].name)
+
 	for key, val := range c.patientList["1003917"].appointmentTimes {
 		fmt.Println(key, val)
 	}
-	fmt.Println("MRN: ", c.patientList["1003917"].mrn)
-	fmt.Println("Name: ", c.patientList["1003917"].name)
+
+	for key, val := range c.patientList["1003917"].orders {
+		fmt.Println("order # ", key)
+		fmt.Println(val)
+	}
 
 	return nil
 }
@@ -152,11 +158,12 @@ func (c *config) createPatient(mrn, name string) error {
 	}
 
 	appointmentTimeMap := make(map[string]time.Time)
+	ordersMap := make(map[string]string)
 	c.patientList[mrn] = Patient{
 		mrn:              mrn,
 		name:             name,
 		appointmentTimes: appointmentTimeMap,
-		orders:           []string{},
+		orders:           ordersMap,
 	}
 
 	return nil
@@ -170,6 +177,10 @@ func (c *config) addAppointment(mrn, schedule, date, time string) error {
 
 	c.patientList[mrn].appointmentTimes[schedule] = apptDateTime
 	return nil
+}
+
+func (c *config) addOrder(mrn, orderNumber, orderName string) {
+	c.patientList[mrn].orders[orderNumber] = orderName
 }
 
 func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
@@ -188,9 +199,13 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 
 	}
 
-	//for _, row := range ordersRows[1:] {
-	//
-	//}
+	for _, row := range ordersRows[1:] {
+		if _, ok := c.patientList[row[3]]; !ok {
+			c.createPatient(row[3], row[0])
+		}
+
+		c.addOrder(row[3], row[7], row[6])
+	}
 
 	return nil
 }

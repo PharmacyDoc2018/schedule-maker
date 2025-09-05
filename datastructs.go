@@ -22,5 +22,5 @@ type Patient struct {
 	mrn              string
 	name             string
 	appointmentTimes map[string]time.Time
-	orders           []string
+	orders           map[string]string
 }
