@@ -11,9 +11,10 @@ type cliCommand struct {
 }
 
 type config struct {
-	lastInput   []string
-	pathToSch   string
-	patientList map[string]Patient
+	lastInput     []string
+	pathToSch     string
+	patientList   map[string]Patient
+	missingOrders missingOrdersQueue
 }
 
 type commandMapList map[string]cliCommand

@@ -23,17 +23,9 @@ func initScheduledPatients(c *config) error {
 		return err
 	}
 
-	fmt.Println("MRN: ", c.patientList["1003917"].mrn)
-	fmt.Println("Name: ", c.patientList["1003917"].name)
-
-	for key, val := range c.patientList["1003917"].appointmentTimes {
-		fmt.Println(key, val)
-	}
-
-	for key, val := range c.patientList["1003917"].orders {
-		fmt.Println("order # ", key)
-		fmt.Println(val)
-	}
+	fmt.Println("finding missing orders...")
+	c.findMissingOrders()
+	fmt.Println("found", c.missingOrders.len, "patient(s) with missing orders...")
 
 	return nil
 }
@@ -208,4 +200,13 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 	}
 
 	return nil
+}
+
+func (c *config) findMissingOrders() {
+	const noOrders = 0
+	for mrn := range c.patientList {
+		if len(c.patientList[mrn].orders) == noOrders {
+			c.missingOrders.AddPatient(mrn)
+		}
+	}
 }
