@@ -8,6 +8,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type cliCommand struct {
+	name        string
+	description string
+	callback    func(*config) error
+}
+
+type commandMapList map[string]cliCommand
+
 func getCommands() commandMapList {
 	commands := commandMapList{
 		"hello": {
@@ -28,6 +36,18 @@ func initREPL() *config {
 	}
 
 	config.patientList = map[string]Patient{}
+
+	nodeMap := make(map[int]*LocationNode)
+	nodeMap[0] = &LocationNode{
+		id:       0,
+		name:     "pharmacy",
+		patient:  Patient{},
+		parentID: -1,
+	}
+	config.location = Location{
+		allNodes:      nodeMap,
+		currentNodeID: 0,
+	}
 
 	return config
 }

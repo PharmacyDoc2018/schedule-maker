@@ -10,6 +10,13 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+type Patient struct {
+	mrn              string
+	name             string
+	appointmentTimes map[string]time.Time
+	orders           map[string]string
+}
+
 func initScheduledPatients(c *config) error {
 	fmt.Println("pulling data from excel files...")
 	scheduleRows, ordersRows, err := pullData(c)

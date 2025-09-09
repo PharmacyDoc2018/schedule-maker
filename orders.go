@@ -22,3 +22,11 @@ func (m *missingOrdersQueue) PopPatient() {
 func (m *missingOrdersQueue) Clear() {
 	m.queue = nil
 }
+
+func (m *missingOrdersQueue) NextPatient() string {
+	return m.queue[0]
+}
+
+func (c *config) EnterOrders(mrn string) {
+	//
+}

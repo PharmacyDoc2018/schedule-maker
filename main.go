@@ -6,6 +6,14 @@ import (
 	"os"
 )
 
+type config struct {
+	missingOrders missingOrdersQueue
+	lastInput     []string
+	pathToSch     string
+	patientList   map[string]Patient
+	location      Location
+}
+
 func main() {
 	commands := getCommands()
 	config := initREPL()
@@ -16,7 +24,8 @@ func main() {
 	}
 
 	scheduleMaker := bufio.NewScanner(os.Stdin)
-	fmt.Printf("pharmacy > ")
+	fmt.Printf(config.location.Path())
+	//fmt.Printf("pharmacy > ")
 	for scheduleMaker.Scan() {
 		input := scheduleMaker.Text()
 		err := commandExe(input, commands, config)
@@ -24,7 +33,8 @@ func main() {
 			fmt.Println(err)
 		}
 		fmt.Println()
-		fmt.Printf("pharmacy > ")
+		fmt.Printf(config.location.Path())
+		//fmt.Printf("pharmacy > ")
 	}
 
 }
