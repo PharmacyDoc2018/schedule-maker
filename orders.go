@@ -43,3 +43,12 @@ func (c *config) AddOrderQuick(mrn, orderName string) {
 
 	c.AddOrder(mrn, pseudoOrderNum, orderName)
 }
+
+func (c *config) FindMissingOrders() {
+	const noOrders = 0
+	for mrn := range c.patientList {
+		if len(c.patientList[mrn].orders) == noOrders {
+			c.missingOrders.AddPatient(mrn)
+		}
+	}
+}

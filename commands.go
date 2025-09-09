@@ -23,6 +23,11 @@ func getCommands() commandMapList {
 			description: "prints hello to the console",
 			callback:    commandHello,
 		},
+		"select": {
+			name:        "select",
+			description: "select a location to move to",
+			callback:    commandSelect,
+		},
 	}
 	return commands
 }
@@ -34,6 +39,8 @@ func initREPL() *config {
 	config := &config{
 		pathToSch: pathToSch,
 	}
+
+	config.commands = getCommands()
 
 	config.patientList = map[string]Patient{}
 
@@ -75,8 +82,43 @@ func commandHello(c *config) error {
 	return nil
 }
 
-func commandLookup(input string, commands commandMapList) (cliCommand, error) {
-	for _, c := range commands {
+func commandSelect(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error too few arguments")
+	}
+
+	if len(c.lastInput) > 3 {
+		return fmt.Errorf("error too many arguments.")
+	}
+
+	firstArg := c.lastInput[1]
+
+	switch firstArg {
+	case "pt", "patient":
+		err := commandSelectPatient(c)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return nil
+}
+
+func commandSelectPatient(c *config) error {
+	mrn := c.lastInput[2]
+	if _, ok := c.patientList[mrn]; !ok {
+		return fmt.Errorf("error. cannot find patient.")
+	}
+	err := c.location.SelectPatientNode(mrn)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *config) commandLookup(input string) (cliCommand, error) {
+	for _, c := range c.commands {
 		if input == c.name {
 			return c, nil
 		}
@@ -84,12 +126,12 @@ func commandLookup(input string, commands commandMapList) (cliCommand, error) {
 	return cliCommand{}, fmt.Errorf("unknown command")
 }
 
-func commandExe(input string, commands commandMapList, config *config) error {
-	cleanInputAndStore(config, input)
-	command, err := commandLookup(config.lastInput[0], commands)
+func (c *config) CommandExe(input string) error {
+	cleanInputAndStore(c, input)
+	command, err := c.commandLookup(c.lastInput[0])
 	if err != nil {
 		return err
 	}
-	command.callback(config)
+	command.callback(c)
 	return nil
 }

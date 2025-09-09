@@ -10,12 +10,12 @@ type config struct {
 	missingOrders missingOrdersQueue
 	lastInput     []string
 	pathToSch     string
-	patientList   map[string]Patient
 	location      Location
+	patientList   map[string]Patient
+	commands      commandMapList
 }
 
 func main() {
-	commands := getCommands()
 	config := initREPL()
 
 	err := initScheduledPatients(config)
@@ -28,7 +28,7 @@ func main() {
 	//fmt.Printf("pharmacy > ")
 	for scheduleMaker.Scan() {
 		input := scheduleMaker.Text()
-		err := commandExe(input, commands, config)
+		err := config.CommandExe(input)
 		if err != nil {
 			fmt.Println(err)
 		}

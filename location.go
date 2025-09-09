@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -56,4 +57,20 @@ func (l *Location) NewPatientNode(mrn string, parentID int) (newNodeID int) {
 	l.allNodes[newNodeID].locType = PatientLoc
 
 	return newNodeID
+}
+
+func (l *Location) ChangeNodeLoc(name string) {
+	//
+}
+
+func (l *Location) SelectPatientNode(mrn string) error {
+	if l.currentNodeID != mainNodeID {
+		return fmt.Errorf("error. patient must be selected from home.")
+	}
+
+	newNodeID := l.NewNode(mrn, l.currentNodeID)
+	l.allNodes[newNodeID].locType = PatientLoc
+	l.currentNodeID = newNodeID
+
+	return nil
 }
