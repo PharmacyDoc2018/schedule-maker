@@ -1,5 +1,10 @@
 package main
 
+import (
+	"math/rand"
+	"strconv"
+)
+
 type missingOrdersQueue struct {
 	queue []string
 	len   int
@@ -27,6 +32,14 @@ func (m *missingOrdersQueue) NextPatient() string {
 	return m.queue[0]
 }
 
-func (c *config) EnterOrders(mrn string) {
-	//
+func (c *config) AddOrder(mrn, orderNum, orderName string) {
+	c.patientList[mrn].orders[orderNum] = orderName
+}
+
+func (c *config) AddOrderQuick(mrn, orderName string) {
+	//for adding orders without an order number
+	randNum := rand.Intn(90000000) + 10000000
+	pseudoOrderNum := "U" + strconv.Itoa(randNum)
+
+	c.AddOrder(mrn, pseudoOrderNum, orderName)
 }

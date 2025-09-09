@@ -6,10 +6,18 @@ import (
 
 const mainNodeID = 0
 
+type LocationType int
+
+const (
+	Home LocationType = iota
+	PatientLoc
+	UnknownLoc
+)
+
 type LocationNode struct {
 	id       int
 	name     string
-	patient  Patient
+	locType  LocationType
 	parentID int
 }
 
@@ -36,17 +44,16 @@ func (l *Location) NewNode(name string, parentID int) (newNodeID int) {
 	l.allNodes[newNodeID] = &LocationNode{
 		id:       newNodeID,
 		name:     name,
+		locType:  UnknownLoc,
 		parentID: parentID,
 	}
 
 	return newNodeID
 }
 
-func (l *Location) NewPatientNode(c *config, mrn string, parentID int) (newNodeID int) {
-	patient := c.patientList[mrn]
-
+func (l *Location) NewPatientNode(mrn string, parentID int) (newNodeID int) {
 	newNodeID = l.NewNode(mrn, parentID)
-	l.allNodes[newNodeID].patient = patient
+	l.allNodes[newNodeID].locType = PatientLoc
 
 	return newNodeID
 }

@@ -41,7 +41,7 @@ func initREPL() *config {
 	nodeMap[0] = &LocationNode{
 		id:       0,
 		name:     "pharmacy",
-		patient:  Patient{},
+		locType:  Home,
 		parentID: -1,
 	}
 	config.location = Location{
