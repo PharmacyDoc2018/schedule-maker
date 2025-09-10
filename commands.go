@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/chzyer/readline"
 	"github.com/joho/godotenv"
 )
 
@@ -59,6 +60,17 @@ func initREPL() *config {
 	return config
 }
 
+func initPrefixCompleter() *readline.PrefixCompleter {
+	completer := readline.NewPrefixCompleter()
+	fmt.Println(completer.Name)
+	fmt.Println(completer.Dynamic)
+	fmt.Println(completer.Callback)
+	fmt.Println(completer.Children)
+
+	return completer
+
+}
+
 func cleanInput(text string) []string {
 	var textWords []string
 	text = strings.ToLower(text)
@@ -88,7 +100,7 @@ func commandSelect(c *config) error {
 	}
 
 	if len(c.lastInput) > 3 {
-		return fmt.Errorf("error too many arguments.")
+		return fmt.Errorf("error too many arguments")
 	}
 
 	firstArg := c.lastInput[1]
@@ -107,7 +119,7 @@ func commandSelect(c *config) error {
 func commandSelectPatient(c *config) error {
 	mrn := c.lastInput[2]
 	if _, ok := c.patientList[mrn]; !ok {
-		return fmt.Errorf("error. cannot find patient.")
+		return fmt.Errorf("error. cannot find patient")
 	}
 	err := c.location.SelectPatientNode(mrn)
 	if err != nil {

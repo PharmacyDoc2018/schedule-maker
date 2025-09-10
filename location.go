@@ -65,7 +65,7 @@ func (l *Location) ChangeNodeLoc(name string) {
 
 func (l *Location) SelectPatientNode(mrn string) error {
 	if l.currentNodeID != mainNodeID {
-		return fmt.Errorf("error. patient must be selected from home.")
+		return fmt.Errorf("error. patient must be selected from home")
 	}
 
 	newNodeID := l.NewNode(mrn, l.currentNodeID)
