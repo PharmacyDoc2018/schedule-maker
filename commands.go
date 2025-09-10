@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chzyer/readline"
 	"github.com/joho/godotenv"
 )
 
@@ -58,17 +57,6 @@ func initREPL() *config {
 	}
 
 	return config
-}
-
-func initPrefixCompleter() *readline.PrefixCompleter {
-	completer := readline.NewPrefixCompleter()
-	fmt.Println(completer.Name)
-	fmt.Println(completer.Dynamic)
-	fmt.Println(completer.Callback)
-	fmt.Println(completer.Children)
-
-	return completer
-
 }
 
 func cleanInput(text string) []string {
