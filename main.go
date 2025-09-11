@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+
+	"github.com/chzyer/readline"
 )
 
 type config struct {
@@ -23,6 +23,26 @@ func main() {
 		fmt.Println(err)
 	}
 
+	completer := config.readlineSetup()
+	rl, _ := readline.NewEx(&readline.Config{
+		Prompt:       config.location.Path(),
+		AutoComplete: completer,
+	})
+
+	for {
+		line, err := rl.Readline()
+		if err != nil {
+			break
+		}
+		err = config.CommandExe(line)
+		if err != nil {
+			fmt.Println(err)
+		}
+		rl.SetPrompt(config.location.Path())
+		fmt.Println()
+	}
+
+	/**
 	scheduleMaker := bufio.NewScanner(os.Stdin)
 
 	fmt.Printf(config.location.Path())
@@ -37,5 +57,6 @@ func main() {
 		fmt.Printf(config.location.Path())
 		//fmt.Printf("pharmacy > ")
 	}
+		**/
 
 }

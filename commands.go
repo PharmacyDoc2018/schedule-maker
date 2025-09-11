@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
-
-	"github.com/joho/godotenv"
 )
 
 type cliCommand struct {
@@ -30,33 +27,6 @@ func getCommands() commandMapList {
 		},
 	}
 	return commands
-}
-
-func initREPL() *config {
-	godotenv.Load(".env")
-	pathToSch := os.Getenv("SCH_PATH")
-
-	config := &config{
-		pathToSch: pathToSch,
-	}
-
-	config.commands = getCommands()
-
-	config.patientList = map[string]Patient{}
-
-	nodeMap := make(map[int]*LocationNode)
-	nodeMap[0] = &LocationNode{
-		id:       0,
-		name:     "pharmacy",
-		locType:  Home,
-		parentID: -1,
-	}
-	config.location = Location{
-		allNodes:      nodeMap,
-		currentNodeID: 0,
-	}
-
-	return config
 }
 
 func cleanInput(text string) []string {
