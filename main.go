@@ -7,14 +7,14 @@ import (
 )
 
 type config struct {
-	missingOrders  missingOrdersQueue
-	lastInput      []string
-	pathToSch      string
-	location       Location
-	patientList    map[string]Patient
-	commands       commandMapList
-	completer      *readline.PrefixCompleter
-	readlineConfig *readline.Config
+	missingOrders        missingOrdersQueue
+	lastInput            []string
+	pathToSch            string
+	location             Location
+	patientList          map[string]Patient
+	commands             commandMapList
+	readlineConfig       *readline.Config
+	readlineCompleterMap map[int]*readline.PrefixCompleter
 }
 
 func main() {

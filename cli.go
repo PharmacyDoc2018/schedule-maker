@@ -31,11 +31,15 @@ func initREPL() *config {
 		currentNodeID: 0,
 	}
 
+	config.readlineCompleterMap = map[int]*readline.PrefixCompleter{}
+
 	return config
 }
 
 func (c *config) readlineSetup() *readline.Instance {
-	completer := readline.NewPrefixCompleter(
+	completerMode := make(map[int]*readline.PrefixCompleter)
+
+	completerMode[int(Home)] = readline.NewPrefixCompleter(
 		readline.PcItem("select",
 			readline.PcItem("pt",
 				readline.PcItemDynamic(c.getPatientArgs),
@@ -45,11 +49,18 @@ func (c *config) readlineSetup() *readline.Instance {
 			),
 		),
 	)
-	c.completer = completer
+
+	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
+		readline.PcItem("add",
+			readline.PcItem("order"),
+		),
+	)
+
+	c.readlineCompleterMap = completerMode
 
 	rl, _ := readline.NewEx(&readline.Config{
 		Prompt:       c.location.Path(),
-		AutoComplete: c.completer,
+		AutoComplete: completerMode[int(Home)],
 	})
 	c.readlineConfig = rl.Config.Clone()
 

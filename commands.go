@@ -96,7 +96,7 @@ func commandSelectPatient(c *config) error {
 
 			}
 		}
-		c.readlineConfig.Prompt = c.location.Path() // -- updating readline.Config to change the prompt at the end of CLI loop
+		c.readlineConfig.Prompt = c.location.Path() // -- updating readline.Config to change the prompt at the end of REPL
 		return nil
 	}
 }
