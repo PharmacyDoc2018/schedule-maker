@@ -34,7 +34,7 @@ func initREPL() *config {
 	return config
 }
 
-func (c *config) readlineSetup() {
+func (c *config) readlineSetup() *readline.Instance {
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("select",
 			readline.PcItem("pt",
@@ -45,8 +45,15 @@ func (c *config) readlineSetup() {
 			),
 		),
 	)
-
 	c.completer = completer
+
+	rl, _ := readline.NewEx(&readline.Config{
+		Prompt:       c.location.Path(),
+		AutoComplete: c.completer,
+	})
+	c.readlineConfig = rl.Config.Clone()
+
+	return rl
 
 }
 
