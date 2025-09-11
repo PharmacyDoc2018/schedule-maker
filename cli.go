@@ -34,16 +34,20 @@ func initREPL() *config {
 	return config
 }
 
-func (c *config) readlineSetup() *readline.PrefixCompleter {
+func (c *config) readlineSetup() {
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("select",
 			readline.PcItem("pt",
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
+			readline.PcItem("patient",
+				readline.PcItemDynamic(c.getPatientArgs),
+			),
 		),
 	)
 
-	return completer
+	c.completer = completer
+
 }
 
 func (c *config) getPatientArgs(input string) []string {

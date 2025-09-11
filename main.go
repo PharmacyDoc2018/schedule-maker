@@ -13,6 +13,7 @@ type config struct {
 	location      Location
 	patientList   map[string]Patient
 	commands      commandMapList
+	completer     *readline.PrefixCompleter
 }
 
 func main() {
@@ -23,10 +24,10 @@ func main() {
 		fmt.Println(err)
 	}
 
-	completer := config.readlineSetup()
+	config.readlineSetup()
 	rl, _ := readline.NewEx(&readline.Config{
 		Prompt:       config.location.Path(),
-		AutoComplete: completer,
+		AutoComplete: config.completer,
 	})
 
 	for {
@@ -39,7 +40,8 @@ func main() {
 			fmt.Println(err)
 		}
 		rl.SetPrompt(config.location.Path())
-		fmt.Println()
+		rl.SetAutoComplete(config.completer) //-- Just need to have it reset the entir config
+		fmt.Println()                        //-- Which is both prompt and completer
 	}
 
 	/**

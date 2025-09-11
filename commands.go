@@ -31,7 +31,7 @@ func getCommands() commandMapList {
 
 func cleanInput(text string) []string {
 	var textWords []string
-	text = strings.ToLower(text)
+	//text = strings.ToLower(text)
 	text = strings.TrimSpace(text)
 	firstPass := strings.Split(text, " ")
 
@@ -53,12 +53,8 @@ func commandHello(c *config) error {
 }
 
 func commandSelect(c *config) error {
-	if len(c.lastInput) < 3 {
+	if len(c.lastInput) < 2 {
 		return fmt.Errorf("error too few arguments")
-	}
-
-	if len(c.lastInput) > 3 {
-		return fmt.Errorf("error too many arguments")
 	}
 
 	firstArg := c.lastInput[1]
@@ -75,16 +71,33 @@ func commandSelect(c *config) error {
 }
 
 func commandSelectPatient(c *config) error {
-	mrn := c.lastInput[2]
-	if _, ok := c.patientList[mrn]; !ok {
-		return fmt.Errorf("error. cannot find patient")
-	}
-	err := c.location.SelectPatientNode(mrn)
-	if err != nil {
-		return err
+	var pt string
+	if len(c.lastInput) == 3 {
+		pt = c.lastInput[2]
+	} else {
+		pt = strings.Join(c.lastInput[2:], " ")
 	}
 
-	return nil
+	if _, ok := c.patientList[pt]; ok {
+		err := c.location.SelectPatientNode(pt)
+		if err != nil {
+			return err
+		}
+		return nil
+
+	} else {
+		for key, val := range c.patientList {
+			if pt == val.name {
+				fmt.Println("Found patient with name. MRN is", key)
+				err := c.location.SelectPatientNode(key)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+		return nil
+	}
 }
 
 func (c *config) commandLookup(input string) (cliCommand, error) {
@@ -102,6 +115,9 @@ func (c *config) CommandExe(input string) error {
 	if err != nil {
 		return err
 	}
-	command.callback(c)
+	err = command.callback(c)
+	if err != nil {
+		return err
+	}
 	return nil
 }
