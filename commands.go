@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -34,6 +35,11 @@ func getCommands() commandMapList {
 			name:        "add",
 			description: "adds elements depending on location",
 			callback:    commandAdd,
+		},
+		"exit": {
+			name:        "exit",
+			description: "exists the CLI",
+			callback:    commandExit,
 		},
 	}
 	return commands
@@ -71,6 +77,14 @@ func commandHome(c *config) error {
 		return err
 	}
 
+	return nil
+}
+
+func commandExit(c *config) error {
+	// -- will need to save data once implemented
+	fmt.Println("closing... goodbye!")
+	c.rl.Close()
+	os.Exit(0)
 	return nil
 }
 

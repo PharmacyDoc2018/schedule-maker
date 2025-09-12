@@ -15,6 +15,7 @@ type config struct {
 	commands             commandMapList
 	readlineConfig       *readline.Config
 	readlineCompleterMap map[int]*readline.PrefixCompleter
+	rl                   *readline.Instance
 }
 
 func main() {
@@ -25,12 +26,13 @@ func main() {
 		fmt.Println(err)
 	}
 
-	rl := config.readlineSetup()
+	config.rl = config.readlineSetup()
+	defer config.rl.Close()
 
 	fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].name)
 
 	for {
-		line, err := rl.Readline()
+		line, err := config.rl.Readline()
 		if err != nil {
 			break
 		}
@@ -39,8 +41,8 @@ func main() {
 			fmt.Println(err)
 		}
 		config.resetPrefixCompleterMode()
-		rl.SetConfig(config.readlineConfig)
-		rl.SetPrompt(config.location.Path())
+		config.rl.SetConfig(config.readlineConfig)
+		config.rl.SetPrompt(config.location.Path())
 		fmt.Println()
 	}
 

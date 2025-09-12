@@ -48,6 +48,7 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
 		),
+		readline.PcItem("exit"),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
