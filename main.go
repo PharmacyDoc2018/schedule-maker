@@ -27,6 +27,8 @@ func main() {
 
 	rl := config.readlineSetup()
 
+	//fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].name)
+
 	for {
 		line, err := rl.Readline()
 		if err != nil {
@@ -40,22 +42,5 @@ func main() {
 		rl.SetConfig(config.readlineConfig)
 		fmt.Println()
 	}
-
-	/**
-	scheduleMaker := bufio.NewScanner(os.Stdin)
-
-	fmt.Printf(config.location.Path())
-	//fmt.Printf("pharmacy > ")
-	for scheduleMaker.Scan() {
-		input := scheduleMaker.Text()
-		err = config.CommandExe(input)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println()
-		fmt.Printf(config.location.Path())
-		//fmt.Printf("pharmacy > ")
-	}
-		**/
 
 }

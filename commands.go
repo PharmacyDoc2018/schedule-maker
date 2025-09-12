@@ -25,6 +25,11 @@ func getCommands() commandMapList {
 			description: "select a location to move to",
 			callback:    commandSelect,
 		},
+		"add": {
+			name:        "add",
+			description: "adds elements depending on location",
+			callback:    commandAdd,
+		},
 	}
 	return commands
 }
@@ -59,13 +64,17 @@ func commandSelect(c *config) error {
 
 	firstArg := c.lastInput[1]
 
-	switch firstArg {
-	case "pt", "patient":
-		err := commandSelectPatient(c)
-		if err != nil {
-			return err
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "pt", "patient":
+			err := commandSelectPatient(c)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-		return nil
+
 	}
 	return nil
 }
@@ -97,8 +106,46 @@ func commandSelectPatient(c *config) error {
 			}
 		}
 		c.readlineConfig.Prompt = c.location.Path() // -- updating readline.Config to change the prompt at the end of REPL
+		c.readlineConfig.AutoComplete = c.readlineCompleterMap[int(PatientLoc)]
 		return nil
 	}
+}
+
+func commandAdd(c *config) error {
+	firstArg := c.lastInput[1]
+
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		// -- Adds for home like add patient
+
+	case PatientLoc:
+		switch firstArg {
+		case "order":
+			err := patientCommandAddOrder(c)
+			if err != nil {
+				return err
+			}
+		}
+
+	default:
+		return fmt.Errorf("command does not exist for this location")
+	}
+
+	return nil
+}
+
+func patientCommandAddOrder(c *config) error {
+	order := strings.Join(c.lastInput[2:], " ")
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+	c.AddOrderQuick(mrn, order)
+	fmt.Println("order added: ", order)
+
+	err := c.missingOrders.RemovePatient(mrn)
+	if err == nil {
+		fmt.Println("patient removed from missing orders list")
+	}
+
+	return nil
 }
 
 func (c *config) commandLookup(input string) (cliCommand, error) {

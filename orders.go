@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 )
@@ -15,13 +16,34 @@ func (m *missingOrdersQueue) AddPatient(mrn string) {
 	m.len += 1
 }
 
-func (m *missingOrdersQueue) PopPatient() {
+func (m *missingOrdersQueue) PopPatient() error {
+	if m.queue == nil {
+		return fmt.Errorf("no more missing orders")
+	}
 	m.queue = m.queue[1:]
 	m.len -= 1
 
 	if len(m.queue) == 0 {
 		m.Clear()
 	}
+
+	return nil
+}
+
+func (m *missingOrdersQueue) RemovePatient(mrn string) error {
+	if m.queue == nil {
+		return fmt.Errorf("no more missing orders")
+	}
+
+	for i := range m.queue {
+		if m.queue[i] == mrn {
+			m.queue = append(m.queue[:i], m.queue[i+1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("patient not found in missing order queue")
+
 }
 
 func (m *missingOrdersQueue) Clear() {
