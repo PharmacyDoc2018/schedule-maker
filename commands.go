@@ -20,6 +20,11 @@ func getCommands() commandMapList {
 			description: "prints hello to the console",
 			callback:    commandHello,
 		},
+		"home": {
+			name:        "home",
+			description: "returns to home location",
+			callback:    commandHome,
+		},
 		"select": {
 			name:        "select",
 			description: "select a location to move to",
@@ -54,6 +59,16 @@ func cleanInputAndStore(c *config, input string) {
 
 func commandHello(c *config) error {
 	fmt.Println("Hello, World!")
+	return nil
+}
+
+func commandHome(c *config) error {
+	err := c.location.ChangeNodeLoc("pharmacy")
+	c.readlineConfig.Prompt = c.location.Path()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -105,8 +120,6 @@ func commandSelectPatient(c *config) error {
 
 			}
 		}
-		c.readlineConfig.Prompt = c.location.Path() // -- updating readline.Config to change the prompt at the end of REPL
-		c.readlineConfig.AutoComplete = c.readlineCompleterMap[int(PatientLoc)]
 		return nil
 	}
 }

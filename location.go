@@ -5,6 +5,7 @@ import (
 	"math/rand"
 )
 
+const invalidNodeID = -1
 const mainNodeID = 0
 
 type LocationType int
@@ -59,8 +60,48 @@ func (l *Location) NewPatientNode(mrn string, parentID int) (newNodeID int) {
 	return newNodeID
 }
 
-func (l *Location) ChangeNodeLoc(name string) {
-	//
+func (l *Location) ChangeNodeLoc(name string) error {
+	desiredLocationID := invalidNodeID
+
+	for _, val := range l.allNodes {
+		if val.name == name {
+			desiredLocationID = val.id
+		}
+	}
+
+	if desiredLocationID == invalidNodeID {
+		return fmt.Errorf("invalid location")
+	}
+
+	for l.currentNodeID != desiredLocationID {
+		oldCurrentNodeID := l.currentNodeID
+		newCurrentNodeID := l.allNodes[l.currentNodeID].parentID
+		l.currentNodeID = newCurrentNodeID
+		err := l.CloseNode(oldCurrentNodeID)
+		if err != nil {
+			l.currentNodeID = oldCurrentNodeID
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (l *Location) CloseNode(nodeID int) error {
+	if nodeID == mainNodeID {
+		return fmt.Errorf("cannot close home node")
+	}
+
+	if _, ok := l.allNodes[nodeID]; !ok {
+		return fmt.Errorf("error. node not found")
+	}
+
+	if l.currentNodeID == nodeID {
+		return fmt.Errorf("error. cannot close current location node")
+	}
+
+	delete(l.allNodes, nodeID)
+	return nil
 }
 
 func (l *Location) SelectPatientNode(mrn string) error {

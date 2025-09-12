@@ -54,6 +54,7 @@ func (c *config) readlineSetup() *readline.Instance {
 		readline.PcItem("add",
 			readline.PcItem("order"),
 		),
+		readline.PcItem("home"),
 	)
 
 	c.readlineCompleterMap = completerMode
@@ -75,4 +76,14 @@ func (c *config) getPatientArgs(input string) []string {
 	}
 
 	return patients
+}
+
+func (c *config) resetPrefixCompleterMode() {
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		c.readlineConfig.AutoComplete = c.readlineCompleterMap[int(Home)]
+
+	case PatientLoc:
+		c.readlineConfig.AutoComplete = c.readlineCompleterMap[int(PatientLoc)]
+	}
 }

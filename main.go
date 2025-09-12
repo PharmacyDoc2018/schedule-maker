@@ -27,7 +27,7 @@ func main() {
 
 	rl := config.readlineSetup()
 
-	//fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].name)
+	fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].name)
 
 	for {
 		line, err := rl.Readline()
@@ -38,8 +38,9 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		//rl.SetPrompt(config.location.Path())
+		config.resetPrefixCompleterMode()
 		rl.SetConfig(config.readlineConfig)
+		rl.SetPrompt(config.location.Path())
 		fmt.Println()
 	}
 
