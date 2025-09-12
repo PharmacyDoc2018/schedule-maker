@@ -63,8 +63,10 @@ func commandHello(c *config) error {
 }
 
 func commandHome(c *config) error {
+	if c.location.currentNodeID == int(Home) {
+		return fmt.Errorf("already at home")
+	}
 	err := c.location.ChangeNodeLoc("pharmacy")
-	c.readlineConfig.Prompt = c.location.Path()
 	if err != nil {
 		return err
 	}
