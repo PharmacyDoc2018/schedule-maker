@@ -204,3 +204,125 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 
 	return nil
 }
+
+type Schedule [][]string
+
+// row[0] == time
+// row[1] == MRN
+// row[2] == name
+// row[4] == orders
+
+func (s Schedule) LongestRowLen() int {
+	longestSoFar := 0
+	for _, row := range s {
+		rowLen := 0
+		for _, item := range row {
+			rowLen += len(item)
+		}
+		if rowLen > longestSoFar {
+			longestSoFar = rowLen
+		}
+	}
+	return longestSoFar
+}
+
+func (s Schedule) LongestPatientName() int {
+	longestSoFar := 0
+	for _, row := range s {
+		if len(row[2]) > longestSoFar {
+			longestSoFar = len(row[2])
+		}
+	}
+
+	return longestSoFar
+}
+
+func (s Schedule) LongestOrderName() int {
+	longestSoFar := 0
+	for _, row := range s {
+		if len(row[2]) > longestSoFar {
+			longestSoFar = len(row[4])
+		}
+	}
+
+	return longestSoFar
+}
+
+func (s Schedule) Print() {
+	const timeColBuffer = 9
+	const mrnColBuffer = 11
+
+	nameColBuffer := s.LongestPatientName() + 4
+	orderColBuffer := s.LongestOrderName() + 4
+
+	rowSeperator := ""
+	for i := 0; i < s.LongestRowLen(); i++ {
+		rowSeperator += "_"
+	}
+
+	cTop := 0
+	cBottom := 0
+
+	fmt.Println(rowSeperator)
+	for cBottom <= len(s)-1 {
+		// -- set cTop and cBottom --
+		row := s[cBottom]
+		for s[cBottom+1][0] == "" {
+			cBottom++
+		}
+
+		// -- Time Column Formatting --
+		totalBuffer := timeColBuffer - len(row[0])
+		backBuffer := int(totalBuffer / 2)
+		frontBuffer := totalBuffer - backBuffer
+		timeColText := ""
+		for i := 0; i < frontBuffer; i++ {
+			timeColText += " "
+		}
+		timeColText += row[0]
+		for i := 0; i < backBuffer; i++ {
+			timeColText += " "
+		}
+
+		// -- MRN Column Formatting --
+		totalBuffer = mrnColBuffer - len(row[1])
+		backBuffer = int(totalBuffer / 2)
+		frontBuffer = totalBuffer - backBuffer
+		mrnColText := ""
+		for i := 0; i < frontBuffer; i++ {
+			mrnColText += " "
+		}
+		mrnColText += row[1]
+		for i := 0; i < backBuffer; i++ {
+			mrnColText += " "
+		}
+
+		// -- Name Column Formatting --
+		totalBuffer = nameColBuffer - len(row[2])
+		frontBuffer = int(totalBuffer / 2)
+		backBuffer = totalBuffer - frontBuffer
+		nameColText := ""
+		for i := 0; i < frontBuffer; i++ {
+			nameColText += " "
+		}
+		nameColText += row[2]
+		for i := 0; i < backBuffer; i++ {
+			nameColText += " "
+		}
+
+		// -- Order Formating and Printing --
+		printLine := int(((cBottom+1)-cTop)/2) + cBottom
+		for i := cTop; i <= cBottom; i++ {
+			totalBuffer = orderColBuffer - len(s[i][3])
+			frontBuffer = int(totalBuffer / 2)
+			backBuffer = totalBuffer + frontBuffer
+			orderColText := "" // -- PICK UP HERE
+			for j := 0; j < frontBuffer; j++ {
+				//
+			}
+			if i == printLine {
+				fmt.Printf("|%s%s%s%s|\n", timeColText, mrnColText, nameColText)
+			}
+		}
+	}
+}

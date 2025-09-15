@@ -41,6 +41,11 @@ func getCommands() commandMapList {
 			description: "exists the CLI",
 			callback:    commandExit,
 		},
+		"get": {
+			name:        "get",
+			description: "get a stored element including schedule and orders",
+			callback:    commandGet,
+		},
 	}
 	return commands
 }
@@ -175,6 +180,62 @@ func patientCommandAddOrder(c *config) error {
 	}
 
 	return nil
+}
+
+func commandGet(c *config) error {
+	// --  input error handling
+
+	firstArg := c.lastInput[1]
+	secondArg := c.lastInput[2]
+
+	switch firstArg {
+	case "schedule":
+
+		switch secondArg {
+		case "infusion", "-i":
+			homeCommandGetScheduleInf(c)
+			return nil
+
+		case "clinic", "-c":
+			//homeCommandGetScheduleClinic()
+			return nil
+
+		default:
+			return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
+		}
+
+	default:
+		return fmt.Errorf("error. unknown argument: %s not found", firstArg)
+	}
+}
+
+func homeCommandGetScheduleInf(c *config) {
+	const infusionAppointmentTag = "AUBL INF"
+	schedule := [][]string{}
+
+	for _, patient := range c.patientList {
+		for appt, apptTime := range patient.appointmentTimes {
+			if strings.Contains(appt, infusionAppointmentTag) {
+				orderBlock := ""
+				for _, order := range patient.orders {
+					orderBlock += "\n" + order
+				}
+				schedule = append(schedule, []string{
+					apptTime.Format("15:04"),
+					patient.mrn,
+					patient.name,
+					orderBlock,
+				})
+				break
+			}
+		}
+	}
+
+	for _, row := range schedule {
+		fmt.Println("____________________")
+		//fmt.Println(row[0], row[1], row[2], row[3])
+		fmt.Printf("%s     %s     %s     %s\n", row[0], row[1], row[2], row[3])
+	}
 }
 
 func (c *config) commandLookup(input string) (cliCommand, error) {
