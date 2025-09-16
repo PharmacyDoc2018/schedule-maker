@@ -10,6 +10,8 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+const infusionAppointmentTag = "AUBL INF"
+
 type Patient struct {
 	mrn              string
 	name             string
@@ -31,7 +33,7 @@ func initScheduledPatients(c *config) error {
 	}
 
 	fmt.Println("finding missing orders...")
-	c.FindMissingOrders()
+	c.FindMissingInfusionOrders()
 	fmt.Println("found", c.missingOrders.len, "patient(s) with missing orders...")
 
 	return nil

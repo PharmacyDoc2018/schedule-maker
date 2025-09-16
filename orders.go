@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 )
+
+const noOrders = 0
 
 type missingOrdersQueue struct {
 	queue []string
@@ -67,10 +70,22 @@ func (c *config) AddOrderQuick(mrn, orderName string) {
 }
 
 func (c *config) FindMissingOrders() {
-	const noOrders = 0
 	for mrn := range c.patientList {
 		if len(c.patientList[mrn].orders) == noOrders {
 			c.missingOrders.AddPatient(mrn)
 		}
+	}
+}
+
+func (c *config) FindMissingInfusionOrders() {
+	for mrn := range c.patientList {
+		if len(c.patientList[mrn].orders) == noOrders {
+			for appt := range c.patientList[mrn].appointmentTimes {
+				if strings.Contains(appt, infusionAppointmentTag) {
+					c.missingOrders.AddPatient(mrn)
+				}
+			}
+		}
+
 	}
 }

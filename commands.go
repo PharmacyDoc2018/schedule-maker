@@ -210,7 +210,6 @@ func commandGet(c *config) error {
 }
 
 func homeCommandGetScheduleInf(c *config) {
-	const infusionAppointmentTag = "AUBL INF"
 	schedule := Schedule{
 		colSpaceBuffer: 2,
 	}
