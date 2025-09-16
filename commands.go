@@ -211,31 +211,44 @@ func commandGet(c *config) error {
 
 func homeCommandGetScheduleInf(c *config) {
 	const infusionAppointmentTag = "AUBL INF"
-	schedule := [][]string{}
+	schedule := Schedule{}
 
 	for _, patient := range c.patientList {
 		for appt, apptTime := range patient.appointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) {
-				orderBlock := ""
-				for _, order := range patient.orders {
-					orderBlock += "\n" + order
+				if len(patient.orders) > 0 {
+					ordersSlice := []string{}
+					for _, order := range patient.orders {
+						ordersSlice = append(ordersSlice, order)
+					}
+					schedule = append(schedule, []string{
+						apptTime.Format("15:04"),
+						patient.mrn,
+						patient.name,
+						ordersSlice[0],
+					})
+					for _, order := range ordersSlice[1:] {
+						schedule = append(schedule, []string{
+							"",
+							"",
+							"",
+							order,
+						})
+					}
+				} else {
+					schedule = append(schedule, []string{
+						apptTime.Format("15:04"),
+						patient.mrn,
+						patient.name,
+						"",
+					})
 				}
-				schedule = append(schedule, []string{
-					apptTime.Format("15:04"),
-					patient.mrn,
-					patient.name,
-					orderBlock,
-				})
 				break
 			}
 		}
 	}
 
-	for _, row := range schedule {
-		fmt.Println("____________________")
-		//fmt.Println(row[0], row[1], row[2], row[3])
-		fmt.Printf("%s     %s     %s     %s\n", row[0], row[1], row[2], row[3])
-	}
+	schedule.Print()
 }
 
 func (c *config) commandLookup(input string) (cliCommand, error) {

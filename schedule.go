@@ -240,8 +240,8 @@ func (s Schedule) LongestPatientName() int {
 func (s Schedule) LongestOrderName() int {
 	longestSoFar := 0
 	for _, row := range s {
-		if len(row[2]) > longestSoFar {
-			longestSoFar = len(row[4])
+		if len(row[3]) > longestSoFar {
+			longestSoFar = len(row[3])
 		}
 	}
 
@@ -255,20 +255,24 @@ func (s Schedule) Print() {
 	nameColBuffer := s.LongestPatientName() + 4
 	orderColBuffer := s.LongestOrderName() + 4
 
-	rowSeperator := ""
-	for i := 0; i < s.LongestRowLen(); i++ {
-		rowSeperator += "_"
+	rowSeperator := " "
+	rowSeperatorLen := timeColBuffer + mrnColBuffer + nameColBuffer + orderColBuffer + 3
+	for i := 0; i < rowSeperatorLen; i++ {
+		rowSeperator += "-"
 	}
 
 	cTop := 0
 	cBottom := 0
 
-	fmt.Println(rowSeperator)
-	for cBottom <= len(s)-1 {
+	for cBottom < len(s)-1 {
+		fmt.Println(rowSeperator)
 		// -- set cTop and cBottom --
 		row := s[cBottom]
 		for s[cBottom+1][0] == "" {
 			cBottom++
+			if cBottom == len(s)-1 {
+				break
+			}
 		}
 
 		// -- Time Column Formatting --
@@ -311,18 +315,44 @@ func (s Schedule) Print() {
 		}
 
 		// -- Order Formating and Printing --
-		printLine := int(((cBottom+1)-cTop)/2) + cBottom
+		timeColBufferSpaces := ""
+		for i := 0; i < timeColBuffer; i++ {
+			timeColBufferSpaces += " "
+		}
+
+		mrnColBufferSpaces := ""
+		for i := 0; i < mrnColBuffer; i++ {
+			mrnColBufferSpaces += " "
+		}
+
+		nameColBufferSpaces := ""
+		for i := 0; i < nameColBuffer; i++ {
+			nameColBufferSpaces += " "
+		}
+
+		printLine := int(((cBottom+1)-cTop)/2) + cTop
 		for i := cTop; i <= cBottom; i++ {
 			totalBuffer = orderColBuffer - len(s[i][3])
 			frontBuffer = int(totalBuffer / 2)
-			backBuffer = totalBuffer + frontBuffer
-			orderColText := "" // -- PICK UP HERE
+			backBuffer = totalBuffer - frontBuffer
+
+			orderColText := ""
 			for j := 0; j < frontBuffer; j++ {
-				//
+				orderColText += " "
+			}
+
+			orderColText += s[i][3]
+			for j := 0; j < backBuffer; j++ {
+				orderColText += " "
 			}
 			if i == printLine {
-				fmt.Printf("|%s%s%s%s|\n", timeColText, mrnColText, nameColText)
+				fmt.Printf("|%s|%s|%s|%s|\n", timeColText, mrnColText, nameColText, orderColText)
+			} else {
+				fmt.Printf("|%s|%s|%s|%s|\n", timeColBufferSpaces, mrnColBufferSpaces, nameColBufferSpaces, orderColText)
 			}
 		}
+		cBottom++
+		cTop = cBottom
 	}
+	fmt.Println(rowSeperator)
 }
