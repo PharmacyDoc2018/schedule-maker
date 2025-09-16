@@ -211,7 +211,9 @@ func commandGet(c *config) error {
 
 func homeCommandGetScheduleInf(c *config) {
 	const infusionAppointmentTag = "AUBL INF"
-	schedule := Schedule{}
+	schedule := Schedule{
+		colSpaceBuffer: 2,
+	}
 
 	for _, patient := range c.patientList {
 		for appt, apptTime := range patient.appointmentTimes {
@@ -221,14 +223,14 @@ func homeCommandGetScheduleInf(c *config) {
 					for _, order := range patient.orders {
 						ordersSlice = append(ordersSlice, order)
 					}
-					schedule = append(schedule, []string{
+					schedule.table = append(schedule.table, []string{
 						apptTime.Format("15:04"),
 						patient.mrn,
 						patient.name,
 						ordersSlice[0],
 					})
 					for _, order := range ordersSlice[1:] {
-						schedule = append(schedule, []string{
+						schedule.table = append(schedule.table, []string{
 							"",
 							"",
 							"",
@@ -236,7 +238,7 @@ func homeCommandGetScheduleInf(c *config) {
 						})
 					}
 				} else {
-					schedule = append(schedule, []string{
+					schedule.table = append(schedule.table, []string{
 						apptTime.Format("15:04"),
 						patient.mrn,
 						patient.name,

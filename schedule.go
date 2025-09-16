@@ -205,7 +205,10 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 	return nil
 }
 
-type Schedule [][]string
+type Schedule struct {
+	table          [][]string
+	colSpaceBuffer int
+}
 
 // row[0] == time
 // row[1] == MRN
@@ -214,7 +217,7 @@ type Schedule [][]string
 
 func (s Schedule) LongestRowLen() int {
 	longestSoFar := 0
-	for _, row := range s {
+	for _, row := range s.table {
 		rowLen := 0
 		for _, item := range row {
 			rowLen += len(item)
@@ -228,7 +231,7 @@ func (s Schedule) LongestRowLen() int {
 
 func (s Schedule) LongestPatientName() int {
 	longestSoFar := 0
-	for _, row := range s {
+	for _, row := range s.table {
 		if len(row[2]) > longestSoFar {
 			longestSoFar = len(row[2])
 		}
@@ -239,7 +242,7 @@ func (s Schedule) LongestPatientName() int {
 
 func (s Schedule) LongestOrderName() int {
 	longestSoFar := 0
-	for _, row := range s {
+	for _, row := range s.table {
 		if len(row[3]) > longestSoFar {
 			longestSoFar = len(row[3])
 		}
@@ -249,14 +252,14 @@ func (s Schedule) LongestOrderName() int {
 }
 
 func (s Schedule) Print() {
-	const timeColBuffer = 9
-	const mrnColBuffer = 11
+	timeColBuffer := 5 + s.colSpaceBuffer
+	mrnColBuffer := 7 + s.colSpaceBuffer
 
-	nameColBuffer := s.LongestPatientName() + 4
-	orderColBuffer := s.LongestOrderName() + 4
+	nameColBuffer := s.LongestPatientName() + s.colSpaceBuffer
+	orderColBuffer := s.LongestOrderName() + s.colSpaceBuffer
 
 	rowSeperator := " "
-	rowSeperatorLen := timeColBuffer + mrnColBuffer + nameColBuffer + orderColBuffer + 3
+	rowSeperatorLen := timeColBuffer + mrnColBuffer + nameColBuffer + orderColBuffer + s.colSpaceBuffer + 1
 	for i := 0; i < rowSeperatorLen; i++ {
 		rowSeperator += "-"
 	}
@@ -264,13 +267,13 @@ func (s Schedule) Print() {
 	cTop := 0
 	cBottom := 0
 
-	for cBottom < len(s)-1 {
+	for cBottom < len(s.table)-1 {
 		fmt.Println(rowSeperator)
 		// -- set cTop and cBottom --
-		row := s[cBottom]
-		for s[cBottom+1][0] == "" {
+		row := s.table[cBottom]
+		for s.table[cBottom+1][0] == "" {
 			cBottom++
-			if cBottom == len(s)-1 {
+			if cBottom == len(s.table)-1 {
 				break
 			}
 		}
@@ -332,7 +335,7 @@ func (s Schedule) Print() {
 
 		printLine := int(((cBottom+1)-cTop)/2) + cTop
 		for i := cTop; i <= cBottom; i++ {
-			totalBuffer = orderColBuffer - len(s[i][3])
+			totalBuffer = orderColBuffer - len(s.table[i][3])
 			frontBuffer = int(totalBuffer / 2)
 			backBuffer = totalBuffer - frontBuffer
 
@@ -341,7 +344,7 @@ func (s Schedule) Print() {
 				orderColText += " "
 			}
 
-			orderColText += s[i][3]
+			orderColText += s.table[i][3]
 			for j := 0; j < backBuffer; j++ {
 				orderColText += " "
 			}
