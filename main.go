@@ -10,6 +10,7 @@ type config struct {
 	missingOrders        missingOrdersQueue
 	lastInput            []string
 	pathToSch            string
+	pathToSave           string
 	location             Location
 	patientList          map[string]Patient
 	commands             commandMapList
@@ -29,7 +30,7 @@ func main() {
 	config.rl = config.readlineSetup()
 	defer config.rl.Close()
 
-	fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].name)
+	fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].Name)
 
 	for {
 		line, err := config.rl.Readline()

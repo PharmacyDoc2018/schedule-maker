@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,10 +14,10 @@ import (
 const infusionAppointmentTag = "AUBL INF"
 
 type Patient struct {
-	mrn              string
-	name             string
-	appointmentTimes map[string]time.Time
-	orders           map[string]string
+	Mrn              string               `json:"mrn"`
+	Name             string               `json:"name"`
+	AppointmentTimes map[string]time.Time `json:"appointment_times"`
+	Orders           map[string]string    `json:"orders"`
 }
 
 func initScheduledPatients(c *config) error {
@@ -161,10 +162,10 @@ func (c *config) createPatient(mrn, name string) error {
 	appointmentTimeMap := make(map[string]time.Time)
 	ordersMap := make(map[string]string)
 	c.patientList[mrn] = Patient{
-		mrn:              mrn,
-		name:             name,
-		appointmentTimes: appointmentTimeMap,
-		orders:           ordersMap,
+		Mrn:              mrn,
+		Name:             name,
+		AppointmentTimes: appointmentTimeMap,
+		Orders:           ordersMap,
 	}
 
 	return nil
@@ -176,11 +177,12 @@ func (c *config) addAppointment(mrn, schedule, date, time string) error {
 		return err
 	}
 
-	c.patientList[mrn].appointmentTimes[schedule] = apptDateTime
+	c.patientList[mrn].AppointmentTimes[schedule] = apptDateTime
 	return nil
 }
 
 func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
+	// only called on init
 	for _, row := range scheduleRows[1:] {
 		if _, ok := c.patientList[row[0]]; !ok {
 			c.createPatient(row[0], row[1])
@@ -193,7 +195,6 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 				return err
 			}
 		}
-
 	}
 
 	for _, row := range ordersRows[1:] {
@@ -202,6 +203,43 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 		}
 
 		c.AddOrder(row[3], row[7], row[6])
+	}
+
+	c.savePatientList()
+	return nil
+}
+
+func (c *config) savePatientList() error {
+	type PatientExport struct {
+		List []Patient `json:"patient_list"`
+	}
+
+	patientExport := PatientExport{}
+
+	for _, patient := range c.patientList {
+		patientExport.List = append(patientExport.List, patient)
+	}
+
+	data, err := json.Marshal(patientExport)
+	if err != nil {
+		return err
+	}
+
+	saveFile, err := os.OpenFile(c.pathToSave, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() error {
+		err = saveFile.Close()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	_, err = saveFile.Write(data)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -10,9 +10,11 @@ import (
 func initREPL() *config {
 	godotenv.Load(".env")
 	pathToSch := os.Getenv("SCH_PATH")
+	pathToSave := os.Getenv("SAVE_PATH")
 
 	config := &config{
-		pathToSch: pathToSch,
+		pathToSch:  pathToSch,
+		pathToSave: pathToSave,
 	}
 
 	config.commands = getCommands()
@@ -80,7 +82,7 @@ func (c *config) readlineSetup() *readline.Instance {
 func (c *config) getPatientArgs(input string) []string {
 	var patients []string
 	for _, val := range c.patientList {
-		patients = append(patients, val.name)
+		patients = append(patients, val.Name)
 	}
 
 	return patients

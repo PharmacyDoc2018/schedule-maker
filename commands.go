@@ -144,7 +144,7 @@ func commandSelectPatient(c *config) error {
 
 	} else {
 		for key, val := range c.patientList {
-			if pt == val.name {
+			if pt == val.Name {
 				fmt.Println("Found patient with name. MRN is", key)
 				err := c.location.SelectPatientNode(key)
 				if err != nil {
@@ -234,16 +234,16 @@ func homeCommandGetScheduleInf(c *config) {
 	}
 	infApptSlices := []infAppt{}
 	for _, patient := range c.patientList {
-		for appt, apptTime := range patient.appointmentTimes {
+		for appt, apptTime := range patient.AppointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) {
 				ordersSlice := []string{}
-				for _, order := range patient.orders {
+				for _, order := range patient.Orders {
 					ordersSlice = append(ordersSlice, order)
 				}
 				infApptSlices = append(infApptSlices, infAppt{
 					time:   apptTime.Format("15:04"),
-					mrn:    patient.mrn,
-					name:   patient.name,
+					mrn:    patient.Mrn,
+					name:   patient.Name,
 					orders: ordersSlice,
 				})
 				break
