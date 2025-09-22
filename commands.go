@@ -48,6 +48,11 @@ func getCommands() commandMapList {
 			description: "get a stored element including schedule and orders",
 			callback:    commandGet,
 		},
+		"clear": {
+			name:        "clear",
+			description: "clears the screen",
+			callback:    commandClear,
+		},
 	}
 	return commands
 }
@@ -92,6 +97,11 @@ func commandExit(c *config) error {
 	fmt.Println("closing... goodbye!")
 	c.rl.Close()
 	os.Exit(0)
+	return nil
+}
+
+func commandClear(c *config) error {
+	fmt.Print("\033[2J\033[H")
 	return nil
 }
 
