@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
+	"time"
 )
 
 type cliCommand struct {
@@ -214,39 +216,62 @@ func homeCommandGetScheduleInf(c *config) {
 		colSpaceBuffer: 2,
 	}
 
+	type infAppt struct {
+		time   string
+		mrn    string
+		name   string
+		orders []string
+	}
+	infApptSlices := []infAppt{}
 	for _, patient := range c.patientList {
 		for appt, apptTime := range patient.appointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) {
-				if len(patient.orders) > 0 {
-					ordersSlice := []string{}
-					for _, order := range patient.orders {
-						ordersSlice = append(ordersSlice, order)
-					}
-					schedule.table = append(schedule.table, []string{
-						apptTime.Format("15:04"),
-						patient.mrn,
-						patient.name,
-						ordersSlice[0],
-					})
-					for _, order := range ordersSlice[1:] {
-						schedule.table = append(schedule.table, []string{
-							"",
-							"",
-							"",
-							order,
-						})
-					}
-				} else {
-					schedule.table = append(schedule.table, []string{
-						apptTime.Format("15:04"),
-						patient.mrn,
-						patient.name,
-						"",
-					})
+				ordersSlice := []string{}
+				for _, order := range patient.orders {
+					ordersSlice = append(ordersSlice, order)
 				}
+				infApptSlices = append(infApptSlices, infAppt{
+					time:   apptTime.Format("15:04"),
+					mrn:    patient.mrn,
+					name:   patient.name,
+					orders: ordersSlice,
+				})
 				break
 			}
 		}
+	}
+
+	sort.Slice(infApptSlices, func(i, j int) bool {
+		a, _ := time.Parse("15:04", infApptSlices[i].time)
+		b, _ := time.Parse("15:04", infApptSlices[j].time)
+		return a.Before(b)
+	})
+
+	for _, appt := range infApptSlices {
+		if len(appt.orders) > 0 {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				appt.orders[0],
+			})
+			for _, order := range appt.orders[1:] {
+				schedule.table = append(schedule.table, []string{
+					"",
+					"",
+					"",
+					order,
+				})
+			}
+		} else {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				"",
+			})
+		}
+
 	}
 
 	schedule.Print()
