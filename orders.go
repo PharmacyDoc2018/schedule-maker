@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const noOrders = 0
@@ -16,7 +18,7 @@ type missingOrdersQueue struct {
 
 func (m *missingOrdersQueue) AddPatient(mrn string) {
 	m.queue = append(m.queue, mrn)
-	m.len += 1
+	m.len++
 }
 
 func (m *missingOrdersQueue) PopPatient() error {
@@ -41,6 +43,7 @@ func (m *missingOrdersQueue) RemovePatient(mrn string) error {
 	for i := range m.queue {
 		if m.queue[i] == mrn {
 			m.queue = append(m.queue[:i], m.queue[i+1:]...)
+			m.len--
 			return nil
 		}
 	}
@@ -51,6 +54,44 @@ func (m *missingOrdersQueue) RemovePatient(mrn string) error {
 
 func (m *missingOrdersQueue) Clear() {
 	m.queue = nil
+	m.len = 0
+}
+
+func (m *missingOrdersQueue) Sort(c *config, key, order string) error {
+	switch key {
+	case "time", "appointmentTime":
+		switch order {
+		case "asc", "ascending":
+			sort.Slice(m.queue, func(i, j int) bool {
+				aTime, _ := func() (time.Time, error) {
+					for appt, apptTime := range c.PatientList[m.queue[i]].AppointmentTimes {
+						if strings.Contains(appt, infusionAppointmentTag) {
+							return apptTime, nil
+						}
+					}
+					return time.Time{}, fmt.Errorf("not found")
+				}()
+
+				bTime, _ := func() (time.Time, error) {
+					for appt, apptTime := range c.PatientList[m.queue[j]].AppointmentTimes {
+						if strings.Contains(appt, infusionAppointmentTag) {
+							return apptTime, nil
+						}
+					}
+					return time.Time{}, fmt.Errorf("not found")
+				}()
+
+				return aTime.Before(bTime)
+			})
+			return nil
+
+		default:
+			return fmt.Errorf("order not found for sorting by infusion appointment time")
+		}
+
+	default:
+		return fmt.Errorf("sort key not valid")
+	}
 }
 
 func (m *missingOrdersQueue) NextPatient() string {
@@ -86,6 +127,6 @@ func (c *config) FindMissingInfusionOrders() {
 				}
 			}
 		}
-
 	}
+	c.missingOrders.Sort(c, "time", "asc")
 }
