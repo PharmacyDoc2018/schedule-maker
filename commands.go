@@ -93,7 +93,9 @@ func commandHome(c *config) error {
 }
 
 func commandExit(c *config) error {
-	// -- will need to save data once implemented
+	fmt.Println("saving schedule...")
+	c.savePatientList()
+	fmt.Println("schedule saved!")
 	fmt.Println("closing... goodbye!")
 	c.rl.Close()
 	os.Exit(0)

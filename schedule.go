@@ -21,16 +21,35 @@ type Patient struct {
 }
 
 func initScheduledPatients(c *config) error {
-	fmt.Println("pulling data from excel files...")
-	scheduleRows, ordersRows, err := pullData(c)
-	if err != nil {
-		return err
-	}
+	_, err := os.Stat(c.pathToSave)
+	fmt.Println("looking for saved data...")
+	if err == nil {
+		fmt.Println("saved data found! pulling schedule...")
+		data, err := os.ReadFile(c.pathToSave)
+		if err != nil {
+			return err
+		}
 
-	fmt.Println("creating patient list...")
-	err = c.createPatientList(scheduleRows, ordersRows)
-	if err != nil {
-		return err
+		savedSchedule := map[string]Patient{}
+		err = json.Unmarshal(data, &savedSchedule)
+		if err != nil {
+			return err
+		}
+
+		c.PatientList = savedSchedule
+
+	} else if os.IsNotExist(err) {
+		fmt.Println("no save data found. looking for excel file...")
+		scheduleRows, ordersRows, err := pullDataFromExcel(c)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("creating patient list...")
+		err = c.createPatientList(scheduleRows, ordersRows)
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("finding missing orders...")
@@ -40,7 +59,7 @@ func initScheduledPatients(c *config) error {
 	return nil
 }
 
-func pullData(c *config) (scheduleRows, ordersRows [][]string, err error) {
+func pullDataFromExcel(c *config) (scheduleRows, ordersRows [][]string, err error) {
 	entries, err := os.ReadDir(c.pathToSch)
 	if err != nil {
 		return [][]string{}, [][]string{}, err
@@ -51,7 +70,7 @@ func pullData(c *config) (scheduleRows, ordersRows [][]string, err error) {
 	}
 
 	if len(entries) > 2 {
-		return [][]string{}, [][]string{}, fmt.Errorf("too many files found")
+		return [][]string{}, [][]string{}, fmt.Errorf("too many files found in excel folder")
 	}
 
 	var schedulePath string
@@ -72,6 +91,8 @@ func pullData(c *config) (scheduleRows, ordersRows [][]string, err error) {
 	if ordersPath == "" {
 		return [][]string{}, [][]string{}, fmt.Errorf("no orders excel file found")
 	}
+
+	fmt.Println("excel files found! pulling data...")
 
 	scheduleXLSX, err := excelize.OpenFile(schedulePath)
 	if err != nil {
