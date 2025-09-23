@@ -12,7 +12,7 @@ type config struct {
 	pathToSch            string
 	pathToSave           string
 	location             Location
-	patientList          map[string]Patient
+	PatientList          map[string]Patient `json:"patient_list"`
 	commands             commandMapList
 	readlineConfig       *readline.Config
 	readlineCompleterMap map[int]*readline.PrefixCompleter
@@ -30,7 +30,7 @@ func main() {
 	config.rl = config.readlineSetup()
 	defer config.rl.Close()
 
-	fmt.Println("first patient with missing order: ", config.patientList[config.missingOrders.NextPatient()].Name)
+	fmt.Println("first patient with missing order: ", config.PatientList[config.missingOrders.NextPatient()].Name)
 
 	for {
 		line, err := config.rl.Readline()

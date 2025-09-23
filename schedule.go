@@ -155,13 +155,13 @@ func parseDateTime(apptDateString, apptTimeString string) (time.Time, error) {
 }
 
 func (c *config) createPatient(mrn, name string) error {
-	if _, ok := c.patientList[mrn]; ok {
+	if _, ok := c.PatientList[mrn]; ok {
 		return fmt.Errorf("patient already exists")
 	}
 
 	appointmentTimeMap := make(map[string]time.Time)
 	ordersMap := make(map[string]string)
-	c.patientList[mrn] = Patient{
+	c.PatientList[mrn] = Patient{
 		Mrn:              mrn,
 		Name:             name,
 		AppointmentTimes: appointmentTimeMap,
@@ -177,14 +177,14 @@ func (c *config) addAppointment(mrn, schedule, date, time string) error {
 		return err
 	}
 
-	c.patientList[mrn].AppointmentTimes[schedule] = apptDateTime
+	c.PatientList[mrn].AppointmentTimes[schedule] = apptDateTime
 	return nil
 }
 
 func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 	// only called on init
 	for _, row := range scheduleRows[1:] {
-		if _, ok := c.patientList[row[0]]; !ok {
+		if _, ok := c.PatientList[row[0]]; !ok {
 			c.createPatient(row[0], row[1])
 		}
 
@@ -198,7 +198,7 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 	}
 
 	for _, row := range ordersRows[1:] {
-		if _, ok := c.patientList[row[3]]; !ok {
+		if _, ok := c.PatientList[row[3]]; !ok {
 			c.createPatient(row[3], row[0])
 		}
 
@@ -210,17 +210,7 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 }
 
 func (c *config) savePatientList() error {
-	type PatientExport struct {
-		List []Patient `json:"patient_list"`
-	}
-
-	patientExport := PatientExport{}
-
-	for _, patient := range c.patientList {
-		patientExport.List = append(patientExport.List, patient)
-	}
-
-	data, err := json.Marshal(patientExport)
+	data, err := json.Marshal(c.PatientList)
 	if err != nil {
 		return err
 	}

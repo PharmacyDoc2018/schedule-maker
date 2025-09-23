@@ -19,7 +19,7 @@ func initREPL() *config {
 
 	config.commands = getCommands()
 
-	config.patientList = map[string]Patient{}
+	config.PatientList = map[string]Patient{}
 
 	nodeMap := make(map[int]*LocationNode)
 	nodeMap[0] = &LocationNode{
@@ -81,7 +81,7 @@ func (c *config) readlineSetup() *readline.Instance {
 
 func (c *config) getPatientArgs(input string) []string {
 	var patients []string
-	for _, val := range c.patientList {
+	for _, val := range c.PatientList {
 		patients = append(patients, val.Name)
 	}
 

@@ -58,7 +58,7 @@ func (m *missingOrdersQueue) NextPatient() string {
 }
 
 func (c *config) AddOrder(mrn, orderNum, orderName string) {
-	c.patientList[mrn].Orders[orderNum] = orderName
+	c.PatientList[mrn].Orders[orderNum] = orderName
 }
 
 func (c *config) AddOrderQuick(mrn, orderName string) {
@@ -70,17 +70,17 @@ func (c *config) AddOrderQuick(mrn, orderName string) {
 }
 
 func (c *config) FindMissingOrders() {
-	for mrn := range c.patientList {
-		if len(c.patientList[mrn].Orders) == noOrders {
+	for mrn := range c.PatientList {
+		if len(c.PatientList[mrn].Orders) == noOrders {
 			c.missingOrders.AddPatient(mrn)
 		}
 	}
 }
 
 func (c *config) FindMissingInfusionOrders() {
-	for mrn := range c.patientList {
-		if len(c.patientList[mrn].Orders) == noOrders {
-			for appt := range c.patientList[mrn].AppointmentTimes {
+	for mrn := range c.PatientList {
+		if len(c.PatientList[mrn].Orders) == noOrders {
+			for appt := range c.PatientList[mrn].AppointmentTimes {
 				if strings.Contains(appt, infusionAppointmentTag) {
 					c.missingOrders.AddPatient(mrn)
 				}
