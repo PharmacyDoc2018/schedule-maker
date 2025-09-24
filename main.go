@@ -30,8 +30,6 @@ func main() {
 	config.rl = config.readlineSetup()
 	defer config.rl.Close()
 
-	fmt.Println("first patient with missing order: ", config.PatientList[config.missingOrders.NextPatient()].Name)
-
 	for {
 		line, err := config.rl.Readline()
 		if err != nil {

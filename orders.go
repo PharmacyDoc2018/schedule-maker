@@ -44,6 +44,9 @@ func (m *missingOrdersQueue) RemovePatient(mrn string) error {
 	for i := range m.queue {
 		if m.queue[i] == mrn {
 			m.queue = append(m.queue[:i], m.queue[i+1:]...)
+			if m.Len() == 0 {
+				m.Clear()
+			}
 			return nil
 		}
 	}
@@ -93,8 +96,11 @@ func (m *missingOrdersQueue) Sort(c *config, key, order string) error {
 	}
 }
 
-func (m *missingOrdersQueue) NextPatient() string {
-	return m.queue[0]
+func (m *missingOrdersQueue) NextPatient() (string, error) {
+	if m.queue == nil {
+		return "", fmt.Errorf("no patients left in queue")
+	}
+	return m.queue[0], nil
 }
 
 func (c *config) AddOrder(mrn, orderNum, orderName string) {

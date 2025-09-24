@@ -69,6 +69,7 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("order"),
 		),
 		readline.PcItem("home"),
+		readline.PcItem("exit"),
 	)
 
 	c.readlineCompleterMap = completerMode

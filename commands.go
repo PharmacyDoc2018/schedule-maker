@@ -148,6 +148,7 @@ func commandSelectPatient(c *config) error {
 		for key, val := range c.PatientList {
 			if pt == val.Name {
 				fmt.Println("Found patient with name. MRN is", key)
+				fmt.Println()
 				err := c.location.SelectPatientNode(key)
 				if err != nil {
 					return err
@@ -222,7 +223,10 @@ func commandGet(c *config) error {
 
 		switch secondArg {
 		case "missingOrderPatient", "mop":
-			homeCommandGetNextMissingOrderPatient(c)
+			err := homeCommandGetNextMissingOrderPatient(c)
+			if err != nil {
+				return err
+			}
 			return nil
 
 		default:
@@ -301,8 +305,12 @@ func homeCommandGetScheduleInf(c *config) {
 }
 
 func homeCommandGetNextMissingOrderPatient(c *config) error {
-	mrn := c.missingOrders.NextPatient()
-	err := c.location.SelectPatientNode(mrn)
+	mrn, err := c.missingOrders.NextPatient()
+	if err != nil {
+		return err
+	}
+
+	err = c.location.SelectPatientNode(mrn)
 	if err != nil {
 		return err
 	}
