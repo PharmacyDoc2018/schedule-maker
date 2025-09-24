@@ -13,6 +13,7 @@ type LocationType int
 const (
 	Home LocationType = iota
 	PatientLoc
+	ReviewNode
 	UnknownLoc
 )
 
@@ -41,6 +42,7 @@ func (l *Location) Path() string {
 }
 
 func (l *Location) NewNode(name string, parentID int) (newNodeID int) {
+	// -- only to be called by other Location methods
 	newNodeID = rand.Intn(9000) + 1000
 
 	l.allNodes[newNodeID] = &LocationNode{
@@ -58,6 +60,31 @@ func (l *Location) NewPatientNode(mrn string, parentID int) (newNodeID int) {
 	l.allNodes[newNodeID].locType = PatientLoc
 
 	return newNodeID
+}
+
+func (l *Location) SelectPatientNode(mrn string) error {
+	if l.currentNodeID != mainNodeID {
+		return fmt.Errorf("error. patient must be selected from home")
+	}
+
+	newNodeID := l.NewPatientNode(mrn, l.currentNodeID)
+	l.currentNodeID = newNodeID
+
+	return nil
+}
+
+func (l *Location) NewReviewNode(name string, parentID int) (newNodeID int) {
+	newNodeID = l.NewNode(name, parentID)
+	l.allNodes[newNodeID].locType = ReviewNode
+
+	return newNodeID
+}
+
+func (l *Location) SelectReviewNode(name string) error {
+	newNodeID := l.NewReviewNode(name, l.currentNodeID)
+	l.currentNodeID = newNodeID
+
+	return nil
 }
 
 func (l *Location) ChangeNodeLoc(name string) error {
@@ -101,17 +128,5 @@ func (l *Location) CloseNode(nodeID int) error {
 	}
 
 	delete(l.allNodes, nodeID)
-	return nil
-}
-
-func (l *Location) SelectPatientNode(mrn string) error {
-	if l.currentNodeID != mainNodeID {
-		return fmt.Errorf("error. patient must be selected from home")
-	}
-
-	newNodeID := l.NewNode(mrn, l.currentNodeID)
-	l.allNodes[newNodeID].locType = PatientLoc
-	l.currentNodeID = newNodeID
-
 	return nil
 }

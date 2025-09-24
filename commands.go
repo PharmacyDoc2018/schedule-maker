@@ -53,6 +53,11 @@ func getCommands() commandMapList {
 			description: "clears the screen",
 			callback:    commandClear,
 		},
+		"review": {
+			name:        "review",
+			description: "opens review node for queues and lists",
+			callback:    commandReview,
+		},
 	}
 	return commands
 }
@@ -318,6 +323,45 @@ func homeCommandGetNextMissingOrderPatient(c *config) error {
 	pt := c.PatientList[mrn].Name
 	fmt.Printf("next patient with missing orders: %s (%s)\n", pt, mrn)
 
+	return nil
+}
+
+func commandReview(c *config) error {
+	// -- Error handling
+
+	firstArg := c.lastInput[1]
+
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+
+	case Home:
+
+		switch firstArg {
+
+		case "moq", "missingOrdersQueue":
+			err := homeCommandReviewMissingOrdersQueue(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("unknown command: %s not a reviewable item", firstArg)
+		}
+
+	default:
+		return fmt.Errorf("error. Review command cannot be used from current node")
+	}
+	return nil
+}
+
+func homeCommandReviewMissingOrdersQueue(c *config) error {
+	if c.location.allNodes[c.location.currentNodeID].locType != Home {
+
+	}
+
+	err := c.location.SelectReviewNode("Missing Orders Queue")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
