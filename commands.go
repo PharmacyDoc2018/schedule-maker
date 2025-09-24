@@ -218,6 +218,17 @@ func commandGet(c *config) error {
 			return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
 		}
 
+	case "next":
+
+		switch secondArg {
+		case "missingOrderPatient", "mop":
+			homeCommandGetNextMissingOrderPatient(c)
+			return nil
+
+		default:
+			return fmt.Errorf("error. unknown next item: %s not found", secondArg)
+		}
+
 	default:
 		return fmt.Errorf("error. unknown argument: %s not found", firstArg)
 	}
@@ -289,6 +300,19 @@ func homeCommandGetScheduleInf(c *config) {
 	schedule.Print()
 }
 
+func homeCommandGetNextMissingOrderPatient(c *config) error {
+	mrn := c.missingOrders.NextPatient()
+	err := c.location.SelectPatientNode(mrn)
+	if err != nil {
+		return err
+	}
+
+	pt := c.PatientList[mrn].Name
+	fmt.Printf("next patient with missing orders: %s (%s)\n", pt, mrn)
+
+	return nil
+}
+
 func (c *config) commandLookup(input string) (cliCommand, error) {
 	for _, c := range c.commands {
 		if input == c.name {
@@ -300,6 +324,9 @@ func (c *config) commandLookup(input string) (cliCommand, error) {
 
 func (c *config) CommandExe(input string) error {
 	cleanInputAndStore(c, input)
+	if len(c.lastInput) == 0 {
+		return nil
+	}
 	command, err := c.commandLookup(c.lastInput[0])
 	if err != nil {
 		return err

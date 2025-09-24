@@ -56,8 +56,12 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItem("infusion"),
 				readline.PcItem("-i"),
 			),
+			readline.PcItem("next",
+				readline.PcItem("mop"),
+				readline.PcItem("missingOrderPatient"),
+			),
+			readline.PcItem("clear"),
 		),
-		readline.PcItem("clear"),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
