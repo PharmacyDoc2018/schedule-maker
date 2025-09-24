@@ -13,12 +13,14 @@ const noOrders = 0
 
 type missingOrdersQueue struct {
 	queue []string
-	len   int
+}
+
+func (m *missingOrdersQueue) Len() int {
+	return len(m.queue)
 }
 
 func (m *missingOrdersQueue) AddPatient(mrn string) {
 	m.queue = append(m.queue, mrn)
-	m.len++
 }
 
 func (m *missingOrdersQueue) PopPatient() error {
@@ -26,7 +28,6 @@ func (m *missingOrdersQueue) PopPatient() error {
 		return fmt.Errorf("no more missing orders")
 	}
 	m.queue = m.queue[1:]
-	m.len -= 1
 
 	if len(m.queue) == 0 {
 		m.Clear()
@@ -43,7 +44,6 @@ func (m *missingOrdersQueue) RemovePatient(mrn string) error {
 	for i := range m.queue {
 		if m.queue[i] == mrn {
 			m.queue = append(m.queue[:i], m.queue[i+1:]...)
-			m.len--
 			return nil
 		}
 	}
@@ -54,7 +54,6 @@ func (m *missingOrdersQueue) RemovePatient(mrn string) error {
 
 func (m *missingOrdersQueue) Clear() {
 	m.queue = nil
-	m.len = 0
 }
 
 func (m *missingOrdersQueue) Sort(c *config, key, order string) error {
@@ -124,6 +123,7 @@ func (c *config) FindMissingInfusionOrders() {
 			for appt := range c.PatientList[mrn].AppointmentTimes {
 				if strings.Contains(appt, infusionAppointmentTag) {
 					c.missingOrders.AddPatient(mrn)
+					break
 				}
 			}
 		}
