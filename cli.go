@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/chzyer/readline"
@@ -62,6 +63,10 @@ func (c *config) readlineSetup() *readline.Instance {
 			),
 			readline.PcItem("clear"),
 		),
+		readline.PcItem("review",
+			readline.PcItem("moq"),
+			readline.PcItem("missingOrdersQueue"),
+		),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
@@ -70,6 +75,10 @@ func (c *config) readlineSetup() *readline.Instance {
 		),
 		readline.PcItem("home"),
 		readline.PcItem("exit"),
+	)
+
+	completerMode[int(ReviewNode)] = readline.NewPrefixCompleter(
+	//
 	)
 
 	c.readlineCompleterMap = completerMode
@@ -100,5 +109,39 @@ func (c *config) resetPrefixCompleterMode() {
 
 	case PatientLoc:
 		c.readlineConfig.AutoComplete = c.readlineCompleterMap[int(PatientLoc)]
+
+	case ReviewNode:
+		c.readlineConfig.AutoComplete = c.readlineCompleterMap[int(ReviewNode)]
+
+	}
+}
+
+func (c *config) readlineLoopStartPreprocess() {
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case ReviewNode:
+
+		switch c.location.allNodes[c.location.currentNodeID].name {
+		case "Missing Orders Queue":
+			mrn, err := c.missingOrders.NextPatient()
+			if err != nil {
+				fmt.Println(err.Error())
+				fmt.Println("returning to home location...")
+				c.location.ChangeNodeLoc("pharmacy")
+				c.resetPrefixCompleterMode()
+				c.rl.SetConfig(c.readlineConfig)
+				c.rl.SetPrompt(c.location.Path())
+				return
+			}
+
+			pt := c.PatientList[mrn].Name
+			fmt.Printf("Current Patient: %s (%s). Adding orders:\n", pt, mrn)
+			if len(c.PatientList[mrn].Orders) > 0 {
+				fmt.Println("Current Orders:")
+				for _, order := range c.PatientList[mrn].Orders {
+					fmt.Println(order)
+				}
+				fmt.Println()
+			}
+		}
 	}
 }

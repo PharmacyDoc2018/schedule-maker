@@ -354,10 +354,6 @@ func commandReview(c *config) error {
 }
 
 func homeCommandReviewMissingOrdersQueue(c *config) error {
-	if c.location.allNodes[c.location.currentNodeID].locType != Home {
-
-	}
-
 	err := c.location.SelectReviewNode("Missing Orders Queue")
 	if err != nil {
 		return err
@@ -375,17 +371,34 @@ func (c *config) commandLookup(input string) (cliCommand, error) {
 }
 
 func (c *config) CommandExe(input string) error {
-	cleanInputAndStore(c, input)
-	if len(c.lastInput) == 0 {
-		return nil
-	}
-	command, err := c.commandLookup(c.lastInput[0])
-	if err != nil {
-		return err
-	}
-	err = command.callback(c)
-	if err != nil {
-		return err
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case ReviewNode:
+		mrn, _ := c.missingOrders.NextPatient()
+		if input == "" {
+			fmt.Println("loading next patient...")
+			c.missingOrders.PopPatient()
+			if len(c.PatientList[mrn].Orders) == 0 {
+				c.missingOrders.AddPatient(mrn)
+			}
+		} else {
+			c.AddOrderQuick(mrn, input)
+			fmt.Println("order added: ", input)
+		}
+
+	default:
+		cleanInputAndStore(c, input)
+		if len(c.lastInput) == 0 {
+			return nil
+		}
+		command, err := c.commandLookup(c.lastInput[0])
+		if err != nil {
+			return err
+		}
+		err = command.callback(c)
+		if err != nil {
+			return err
+		}
+
 	}
 	return nil
 }

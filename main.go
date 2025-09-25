@@ -31,6 +31,7 @@ func main() {
 	defer config.rl.Close()
 
 	for {
+		config.readlineLoopStartPreprocess()
 		line, err := config.rl.Readline()
 		if err != nil {
 			break
