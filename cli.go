@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/chzyer/readline"
 	"github.com/joho/godotenv"
@@ -134,7 +135,16 @@ func (c *config) readlineLoopStartPreprocess() {
 			}
 
 			pt := c.PatientList[mrn].Name
-			fmt.Printf("Current Patient: %s (%s). Adding orders:\n", pt, mrn)
+			apptTime := func() string {
+				for appt, apptTime := range c.PatientList[mrn].AppointmentTimes {
+					if strings.Contains(appt, infusionAppointmentTag) {
+						return apptTime.Format("15:04")
+					}
+				}
+				return ""
+			}()
+
+			fmt.Printf("Current Patient: %s - %s (%s). Adding orders:\n", apptTime, pt, mrn)
 			if len(c.PatientList[mrn].Orders) > 0 {
 				fmt.Println("Current Orders:")
 				for _, order := range c.PatientList[mrn].Orders {
