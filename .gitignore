@@ -2,3 +2,5 @@ schedule/
 data/
 .env
 schedule-maker
+schedule-maker.exe
+build_for_windows.sh
