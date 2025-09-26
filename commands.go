@@ -112,7 +112,7 @@ func commandExit(c *config) error {
 func commandClear(c *config) error {
 	switch runtime.GOOS {
 	case "windows":
-		cmd := exec.Command("cls")
+		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
 		cmd.Run()
 
