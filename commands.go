@@ -117,7 +117,10 @@ func commandClear(c *config) error {
 		cmd.Run()
 
 	default:
-		fmt.Print("\033[2J\033[H")
+		//fmt.Print("\033[2J\033[H")
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
 	}
 	return nil
 }
@@ -315,7 +318,7 @@ func homeCommandGetScheduleInf(c *config) {
 		}
 
 	}
-
+	commandClear(c)
 	schedule.Print()
 }
 
