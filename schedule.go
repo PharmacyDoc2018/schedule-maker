@@ -12,6 +12,7 @@ import (
 )
 
 const infusionAppointmentTag = "AUBL INF"
+const orderNumberLength = 9
 
 type Patient struct {
 	Mrn              string               `json:"mrn"`
@@ -223,7 +224,11 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 			c.createPatient(row[3], row[0])
 		}
 
-		c.AddOrder(row[3], row[7], row[6])
+		if len(row[7]) != orderNumberLength {
+			c.AddOrderQuick(row[3], row[6])
+		} else {
+			c.AddOrder(row[3], row[7], row[6])
+		}
 	}
 
 	c.savePatientList()
