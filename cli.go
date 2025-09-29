@@ -13,10 +13,12 @@ func initREPL() *config {
 	godotenv.Load(".env")
 	pathToSch := os.Getenv("SCH_PATH")
 	pathToSave := os.Getenv("SAVE_PATH")
+	pathToIgnoredOrders := os.Getenv("IGNORED_ORDERS_PATH")
 
 	config := &config{
-		pathToSch:  pathToSch,
-		pathToSave: pathToSave,
+		pathToSch:           pathToSch,
+		pathToSave:          pathToSave,
+		pathToIgnoredOrders: pathToIgnoredOrders,
 	}
 
 	config.commands = getCommands()
@@ -67,6 +69,9 @@ func (c *config) readlineSetup() *readline.Instance {
 		readline.PcItem("review",
 			readline.PcItem("moq"),
 			readline.PcItem("missingOrdersQueue"),
+		),
+		readline.PcItem("add",
+			readline.PcItem("ignoredOrder"),
 		),
 	)
 

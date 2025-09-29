@@ -55,7 +55,12 @@ func initScheduledPatients(c *config) error {
 
 	fmt.Println("finding missing orders...")
 	c.FindMissingInfusionOrders()
-	//fmt.Println("found", c.missingOrders.Len(), "patient(s) with missing orders...")
+
+	err = c.PullIgnoredOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	fmt.Println()
 	return nil
 }

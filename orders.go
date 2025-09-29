@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -135,4 +137,51 @@ func (c *config) FindMissingInfusionOrders() {
 		}
 	}
 	c.missingOrders.Sort(c, "time", "asc")
+}
+
+func (c *config) PullIgnoredOrdersList() error {
+	_, err := os.Stat(c.pathToIgnoredOrders)
+	if err == nil {
+		data, err := os.ReadFile(c.pathToSave)
+		if err != nil {
+			return err
+		}
+
+		ignoredOrders := []string{}
+		err = json.Unmarshal(data, &ignoredOrders)
+		if err != nil {
+			return err
+		}
+
+	} else {
+		return fmt.Errorf("warning: ignored orders list not found")
+	}
+
+	return nil
+}
+
+func (c *config) saveIgnoredOrdersList() error {
+	data, err := json.Marshal(c.IgnoredOrders)
+	if err != nil {
+		return err
+	}
+
+	saveFile, err := os.OpenFile(c.pathToSave, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() error {
+		err = saveFile.Close()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	_, err = saveFile.Write(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

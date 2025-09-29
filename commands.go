@@ -104,6 +104,7 @@ func commandExit(c *config) error {
 	fmt.Println("saving schedule...")
 	c.savePatientList()
 	fmt.Println("schedule saved!")
+	c.saveIgnoredOrdersList()
 	fmt.Println("closing... goodbye!")
 	c.rl.Close()
 	os.Exit(0)
@@ -185,6 +186,13 @@ func commandAdd(c *config) error {
 	switch c.location.allNodes[c.location.currentNodeID].locType {
 	case Home:
 		// -- Adds for home like add patient
+		switch firstArg {
+		case "ignoredOrder":
+			//homeCommandAddIgnoredOrder(c)
+
+		default:
+			return fmt.Errorf("unknown item to add: %s not found", firstArg)
+		}
 
 	case PatientLoc:
 		switch firstArg {

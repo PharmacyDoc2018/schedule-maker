@@ -9,8 +9,10 @@ import (
 type config struct {
 	missingOrders        missingOrdersQueue
 	lastInput            []string
+	IgnoredOrders        []string `json:"ignored_orders"`
 	pathToSch            string
 	pathToSave           string
+	pathToIgnoredOrders  string
 	location             Location
 	PatientList          map[string]Patient `json:"patient_list"`
 	commands             commandMapList
