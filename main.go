@@ -9,7 +9,7 @@ import (
 type config struct {
 	missingOrders        missingOrdersQueue
 	lastInput            []string
-	IgnoredOrders        []string `json:"ignored_orders"`
+	IgnoredOrders        IgnoredOrders
 	pathToSch            string
 	pathToSave           string
 	pathToIgnoredOrders  string

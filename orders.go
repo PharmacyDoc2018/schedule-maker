@@ -139,6 +139,10 @@ func (c *config) FindMissingInfusionOrders() {
 	c.missingOrders.Sort(c, "time", "asc")
 }
 
+type IgnoredOrders struct {
+	List []string `json:"ignored_orders_list"`
+}
+
 func (c *config) PullIgnoredOrdersList() error {
 	_, err := os.Stat(c.pathToIgnoredOrders)
 	if err == nil {
@@ -147,7 +151,7 @@ func (c *config) PullIgnoredOrdersList() error {
 			return err
 		}
 
-		ignoredOrders := []string{}
+		ignoredOrders := IgnoredOrders{}
 		err = json.Unmarshal(data, &ignoredOrders)
 		if err != nil {
 			return err
@@ -166,7 +170,7 @@ func (c *config) saveIgnoredOrdersList() error {
 		return err
 	}
 
-	saveFile, err := os.OpenFile(c.pathToSave, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	saveFile, err := os.OpenFile(c.pathToIgnoredOrders, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
