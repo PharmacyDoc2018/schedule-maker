@@ -393,6 +393,7 @@ func missingOrdersREPL(c *config, input string) {
 	default:
 		c.AddOrderQuick(mrn, input)
 		fmt.Println("order added: ", input)
+		commandClear(c)
 
 	}
 
