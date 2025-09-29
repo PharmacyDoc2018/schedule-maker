@@ -96,6 +96,7 @@ func commandHome(c *config) error {
 		return err
 	}
 
+	commandClear(c)
 	return nil
 }
 

@@ -153,5 +153,17 @@ func (c *config) readlineLoopStartPreprocess() {
 				fmt.Println()
 			}
 		}
+
+	case Home:
+		var infusionPatientNum int
+		for mrn := range c.PatientList {
+			for appt := range c.PatientList[mrn].AppointmentTimes {
+				if strings.Contains(appt, infusionAppointmentTag) {
+					infusionPatientNum++
+					break
+				}
+			}
+		}
+		fmt.Printf("Infusion Patients(%d). Missing Orders(%d):\n", infusionPatientNum, c.missingOrders.Len())
 	}
 }
