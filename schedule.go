@@ -372,16 +372,14 @@ func (s Schedule) Print(c *config, filters []string) {
 	cTop := 0
 	cBottom := 0
 
-	for cBottom < len(s.table)-1 {
-		fmt.Println(rowSeperator)
-		// -- set cTop and cBottom --
-		row := s.table[cBottom]
-		for s.table[cBottom+1][0] == "" {
+	for cTop < len(s.table) {
+		cBottom = cTop
+		for cBottom+1 < len(s.table) && s.table[cBottom+1][0] == "" {
 			cBottom++
-			if cBottom == len(s.table)-1 {
-				break
-			}
 		}
+		fmt.Println(rowSeperator)
+
+		row := s.table[cTop]
 
 		// -- Time Column Formatting --
 		totalBuffer := timeColBuffer - len(row[0])
@@ -459,8 +457,8 @@ func (s Schedule) Print(c *config, filters []string) {
 				fmt.Printf("|%s|%s|%s|%s|\n", timeColBufferSpaces, mrnColBufferSpaces, nameColBufferSpaces, orderColText)
 			}
 		}
-		cBottom++
-		cTop = cBottom
+		//cBottom++
+		cTop = cBottom + 1
 	}
 	fmt.Println(rowSeperator)
 }
