@@ -274,7 +274,7 @@ type Schedule struct {
 // row[0] == time
 // row[1] == MRN
 // row[2] == name
-// row[4] == orders
+// row[3] == orders
 
 func (s Schedule) LongestRowLen() int {
 	longestSoFar := 0
@@ -312,8 +312,52 @@ func (s Schedule) LongestOrderName() int {
 	return longestSoFar
 }
 
-func (s Schedule) Print() {
-	timeColBuffer := 5 + s.colSpaceBuffer
+func (s Schedule) Print(c *config, filters []string) {
+	ignoredSet := make(map[string]struct{}, len(c.IgnoredOrders.List))
+	for _, order := range c.IgnoredOrders.List {
+		ignoredSet[order] = struct{}{}
+	}
+
+	var newTable [][]string
+
+	for _, filter := range filters {
+		switch filter {
+		case "default":
+			i := 0
+			for i < len(s.table) {
+				row := s.table[i]
+				if len(row) < 4 {
+					newTable = append(newTable, row)
+					i++
+					continue
+				}
+
+				key := strings.ReplaceAll(strings.ToLower(row[3]), " ", "")
+				if _, found := ignoredSet[key]; found {
+					if row[0] != "" && i+1 < len(s.table) {
+						nextRow := s.table[i+1]
+						if nextRow[0] == "" {
+							s.table[i+1][0] = row[0]
+							s.table[i+1][1] = row[1]
+							s.table[i+1][2] = row[2]
+							i++
+							continue
+						} else if nextRow[0] != "" {
+							s.table[i][3] = ""
+							newTable = append(newTable, s.table[i])
+						}
+					}
+				} else {
+					newTable = append(newTable, s.table[i])
+				}
+				i++
+			}
+
+			s.table = newTable
+		}
+	}
+
+	timeColBuffer := 8 + s.colSpaceBuffer
 	mrnColBuffer := 7 + s.colSpaceBuffer
 
 	nameColBuffer := s.LongestPatientName() + s.colSpaceBuffer

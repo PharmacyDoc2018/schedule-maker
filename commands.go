@@ -295,6 +295,9 @@ func homeCommandGetScheduleInf(c *config) {
 		name   string
 		orders []string
 	}
+
+	const timeFormat = "3:04 PM"
+
 	infApptSlices := []infAppt{}
 	for _, patient := range c.PatientList {
 		for appt, apptTime := range patient.AppointmentTimes {
@@ -304,7 +307,7 @@ func homeCommandGetScheduleInf(c *config) {
 					ordersSlice = append(ordersSlice, order)
 				}
 				infApptSlices = append(infApptSlices, infAppt{
-					time:   apptTime.Format("15:04"),
+					time:   apptTime.Format(timeFormat),
 					mrn:    patient.Mrn,
 					name:   patient.Name,
 					orders: ordersSlice,
@@ -315,8 +318,8 @@ func homeCommandGetScheduleInf(c *config) {
 	}
 
 	sort.Slice(infApptSlices, func(i, j int) bool {
-		a, _ := time.Parse("15:04", infApptSlices[i].time)
-		b, _ := time.Parse("15:04", infApptSlices[j].time)
+		a, _ := time.Parse(timeFormat, infApptSlices[i].time)
+		b, _ := time.Parse(timeFormat, infApptSlices[j].time)
 		return a.Before(b)
 	})
 
@@ -346,8 +349,8 @@ func homeCommandGetScheduleInf(c *config) {
 		}
 
 	}
-	commandClear(c)
-	schedule.Print()
+	//commandClear(c)
+	schedule.Print(c, []string{"default"})
 }
 
 func homeCommandGetNextMissingOrderPatient(c *config) error {

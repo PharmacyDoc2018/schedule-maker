@@ -146,7 +146,7 @@ type IgnoredOrders struct {
 func (c *config) PullIgnoredOrdersList() error {
 	_, err := os.Stat(c.pathToIgnoredOrders)
 	if err == nil {
-		data, err := os.ReadFile(c.pathToSave)
+		data, err := os.ReadFile(c.pathToIgnoredOrders)
 		if err != nil {
 			return err
 		}
@@ -156,6 +156,8 @@ func (c *config) PullIgnoredOrdersList() error {
 		if err != nil {
 			return err
 		}
+
+		c.IgnoredOrders = ignoredOrders
 
 	} else {
 		return fmt.Errorf("warning: ignored orders list not found")
