@@ -143,7 +143,7 @@ func (c *config) readlineLoopStartPreprocess() {
 			apptTime := func() string {
 				for appt, apptTime := range c.PatientList[mrn].AppointmentTimes {
 					if strings.Contains(appt, infusionAppointmentTag) {
-						return apptTime.Format("15:04")
+						return apptTime.Format(timeFormat)
 					}
 				}
 				return ""

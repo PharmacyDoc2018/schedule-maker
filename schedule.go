@@ -13,6 +13,7 @@ import (
 
 const infusionAppointmentTag = "AUBL INF"
 const orderNumberLength = 9
+const timeFormat = "3:04 PM"
 
 type Patient struct {
 	Mrn              string               `json:"mrn"`

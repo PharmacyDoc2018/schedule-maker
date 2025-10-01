@@ -296,8 +296,6 @@ func homeCommandGetScheduleInf(c *config) {
 		orders []string
 	}
 
-	const timeFormat = "3:04 PM"
-
 	infApptSlices := []infAppt{}
 	for _, patient := range c.PatientList {
 		for appt, apptTime := range patient.AppointmentTimes {
@@ -349,7 +347,7 @@ func homeCommandGetScheduleInf(c *config) {
 		}
 
 	}
-	//commandClear(c)
+	commandClear(c)
 	schedule.Print(c, []string{"default"})
 }
 
