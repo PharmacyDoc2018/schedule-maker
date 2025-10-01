@@ -249,38 +249,43 @@ func commandGet(c *config) error {
 	firstArg := c.lastInput[1]
 	secondArg := c.lastInput[2]
 
-	switch firstArg {
-	case "schedule":
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "schedule":
 
-		switch secondArg {
-		case "infusion", "-i":
-			homeCommandGetScheduleInf(c)
-			return nil
+			switch secondArg {
+			case "infusion", "-i", "inf":
+				homeCommandGetScheduleInf(c)
+				return nil
 
-		case "clinic", "-c":
-			//homeCommandGetScheduleClinic()
-			return nil
+			case "clinic", "-c":
+				//homeCommandGetScheduleClinic()
+				return nil
 
-		default:
-			return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
-		}
-
-	case "next":
-
-		switch secondArg {
-		case "missingOrderPatient", "mop":
-			err := homeCommandGetNextMissingOrderPatient(c)
-			if err != nil {
-				return err
+			default:
+				return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
 			}
-			return nil
+
+		case "next":
+
+			switch secondArg {
+			case "missingOrderPatient", "mop":
+				err := homeCommandGetNextMissingOrderPatient(c)
+				if err != nil {
+					return err
+				}
+				return nil
+
+			default:
+				return fmt.Errorf("error. unknown next item: %s not found", secondArg)
+			}
 
 		default:
-			return fmt.Errorf("error. unknown next item: %s not found", secondArg)
+			return fmt.Errorf("error. unknown argument: %s not found", firstArg)
 		}
-
 	default:
-		return fmt.Errorf("error. unknown argument: %s not found", firstArg)
+		return fmt.Errorf("get command cannot be used at the current location")
 	}
 }
 
@@ -347,6 +352,22 @@ func homeCommandGetScheduleInf(c *config) {
 		}
 
 	}
+
+	if len(c.lastInput) > 3 {
+		thirdArg := c.lastInput[3]
+
+		switch thirdArg {
+		case "allOrders", "-ao":
+			commandClear(c)
+			schedule.Print(c, []string{})
+			return
+
+		default:
+			fmt.Printf("error: unknown filter %s\n", thirdArg)
+			return
+		}
+	}
+
 	commandClear(c)
 	schedule.Print(c, []string{"default"})
 }
