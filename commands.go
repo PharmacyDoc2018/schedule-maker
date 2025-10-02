@@ -5,9 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"sort"
 	"strings"
-	"time"
 )
 
 type cliCommand struct {
@@ -59,6 +57,11 @@ func getCommands() commandMapList {
 			name:        "review",
 			description: "opens review node for queues and lists",
 			callback:    commandReview,
+		},
+		"mark": {
+			name:        "mark",
+			description: "changes a mark for certain items. i.e. mark complete [patient]",
+			callback:    commandMark,
 		},
 	}
 	return commands
@@ -149,37 +152,6 @@ func commandSelect(c *config) error {
 	return nil
 }
 
-func commandSelectPatient(c *config) error {
-	var pt string
-	if len(c.lastInput) == 3 {
-		pt = c.lastInput[2]
-	} else {
-		pt = strings.Join(c.lastInput[2:], " ")
-	}
-
-	if _, ok := c.PatientList[pt]; ok {
-		err := c.location.SelectPatientNode(pt)
-		if err != nil {
-			return err
-		}
-		return nil
-
-	} else {
-		for key, val := range c.PatientList {
-			if pt == val.Name {
-				fmt.Println("Found patient with name. MRN is", key)
-				fmt.Println()
-				err := c.location.SelectPatientNode(key)
-				if err != nil {
-					return err
-				}
-
-			}
-		}
-		return nil
-	}
-}
-
 func commandAdd(c *config) error {
 	firstArg := c.lastInput[1]
 
@@ -208,36 +180,6 @@ func commandAdd(c *config) error {
 
 	default:
 		return fmt.Errorf("command does not exist for this location")
-	}
-
-	return nil
-}
-
-func homeCommandAddIgnoredOrder(c *config) error {
-	order := strings.Join(c.lastInput[2:], " ")
-	storedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
-
-	for _, item := range c.IgnoredOrders.List {
-		if storedOrder == item {
-			return fmt.Errorf("entry already exists on the Ignored Orders list")
-		}
-	}
-
-	c.IgnoredOrders.List = append(c.IgnoredOrders.List, storedOrder)
-	fmt.Printf("order added: %s will be ignored\n", order)
-
-	return nil
-}
-
-func patientCommandAddOrder(c *config) error {
-	order := strings.Join(c.lastInput[2:], " ")
-	mrn := c.location.allNodes[c.location.currentNodeID].name
-	c.AddOrderQuick(mrn, order)
-	fmt.Println("order added: ", order)
-
-	err := c.missingOrders.RemovePatient(mrn)
-	if err == nil {
-		fmt.Println("patient removed from missing orders list")
 	}
 
 	return nil
@@ -289,106 +231,6 @@ func commandGet(c *config) error {
 	}
 }
 
-func homeCommandGetScheduleInf(c *config) {
-	schedule := Schedule{
-		colSpaceBuffer: 2,
-	}
-
-	type infAppt struct {
-		time   string
-		mrn    string
-		name   string
-		orders []string
-	}
-
-	infApptSlices := []infAppt{}
-	for _, patient := range c.PatientList {
-		for appt, apptTime := range patient.AppointmentTimes {
-			if strings.Contains(appt, infusionAppointmentTag) {
-				ordersSlice := []string{}
-				for _, order := range patient.Orders {
-					ordersSlice = append(ordersSlice, order)
-				}
-				infApptSlices = append(infApptSlices, infAppt{
-					time:   apptTime.Format(timeFormat),
-					mrn:    patient.Mrn,
-					name:   patient.Name,
-					orders: ordersSlice,
-				})
-				break
-			}
-		}
-	}
-
-	sort.Slice(infApptSlices, func(i, j int) bool {
-		a, _ := time.Parse(timeFormat, infApptSlices[i].time)
-		b, _ := time.Parse(timeFormat, infApptSlices[j].time)
-		return a.Before(b)
-	})
-
-	for _, appt := range infApptSlices {
-		if len(appt.orders) > 0 {
-			schedule.table = append(schedule.table, []string{
-				appt.time,
-				appt.mrn,
-				appt.name,
-				appt.orders[0],
-			})
-			for _, order := range appt.orders[1:] {
-				schedule.table = append(schedule.table, []string{
-					"",
-					"",
-					"",
-					order,
-				})
-			}
-		} else {
-			schedule.table = append(schedule.table, []string{
-				appt.time,
-				appt.mrn,
-				appt.name,
-				"",
-			})
-		}
-
-	}
-
-	if len(c.lastInput) > 3 {
-		thirdArg := c.lastInput[3]
-
-		switch thirdArg {
-		case "allOrders", "-ao":
-			commandClear(c)
-			schedule.Print(c, []string{})
-			return
-
-		default:
-			fmt.Printf("error: unknown filter %s\n", thirdArg)
-			return
-		}
-	}
-
-	commandClear(c)
-	schedule.Print(c, []string{"default"})
-}
-
-func homeCommandGetNextMissingOrderPatient(c *config) error {
-	mrn, err := c.missingOrders.NextPatient()
-	if err != nil {
-		return err
-	}
-
-	err = c.location.SelectPatientNode(mrn)
-	if err != nil {
-		return err
-	}
-
-	pt := c.PatientList[mrn].Name
-	fmt.Printf("next patient with missing orders: %s (%s)\n", pt, mrn)
-
-	return nil
-}
-
 func commandReview(c *config) error {
 	// -- Error handling
 
@@ -411,45 +253,35 @@ func commandReview(c *config) error {
 		}
 
 	default:
-		return fmt.Errorf("error. Review command cannot be used from current node")
+		return fmt.Errorf("error. review command cannot be used from current node")
 	}
 	return nil
 }
 
-func homeCommandReviewMissingOrdersQueue(c *config) error {
-	// since the review node changes the REPL entirely, REPL logic handled by
-	// missingOrdersREPL()
-	err := c.location.SelectReviewNode("Missing Orders Queue")
-	if err != nil {
-		return err
+func commandMark(c *config) error {
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
 	}
-	return nil
-}
+	firstArg := c.lastInput[1]
 
-func missingOrdersREPL(c *config, input string) {
-	mrn, _ := c.missingOrders.NextPatient()
-	switch input {
-	case "":
-		fmt.Println("loading next patient...")
-		c.missingOrders.PopPatient()
-		if len(c.PatientList[mrn].Orders) == 0 {
-			c.missingOrders.AddPatient(mrn)
-		}
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "done":
+			err := homeCommandMarkDone(c)
+			if err != nil {
+				return err
+			}
 
-	case "q", "quit":
-		fmt.Println("exiting Missing Orders Queue...")
-		err := c.location.ChangeNodeLoc("pharmacy")
-		if err != nil {
-			fmt.Println(err.Error())
+		default:
+			return fmt.Errorf("error. %s is not a markable item", firstArg)
 		}
 
 	default:
-		c.AddOrderQuick(mrn, input)
-		fmt.Println("order added: ", input)
-		commandClear(c)
-
+		return fmt.Errorf("error. mark command cannot be used from current node")
 	}
 
+	return nil
 }
 
 func (c *config) commandLookup(input string) (cliCommand, error) {

@@ -20,6 +20,7 @@ type Patient struct {
 	Name             string               `json:"name"`
 	AppointmentTimes map[string]time.Time `json:"appointment_times"`
 	Orders           map[string]string    `json:"orders"`
+	VisitComplete    bool                 `json:"visit_complete"`
 }
 
 func initScheduledPatients(c *config) error {
