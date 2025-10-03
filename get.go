@@ -71,23 +71,38 @@ func homeCommandGetScheduleInf(c *config) {
 
 	}
 
+	filters := []string{"defaultOrderFilter", "defaultPatientFilterDone"}
 	if len(c.lastInput) > 3 {
-		thirdArg := c.lastInput[3]
+		args := c.lastInput[3:]
 
-		switch thirdArg {
-		case "allOrders", "-ao":
-			commandClear(c)
-			schedule.Print(c, []string{})
-			return
+		for _, arg := range args {
+			switch arg {
+			case "--allOrders", "-ao":
+				for i := range filters {
+					if filters[i] == "defaultOrderFilter" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
 
-		default:
-			fmt.Printf("error: unknown filter %s\n", thirdArg)
-			return
+			case "--allPatients", "-ap":
+				for i := range filters {
+					if filters[i] == "defaultPatientFilterDone" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			default:
+				fmt.Printf("error: unknown filter %s\n", arg)
+				return
+			}
 		}
+
 	}
 
 	commandClear(c)
-	schedule.Print(c, []string{"default"})
+	schedule.Print(c, filters)
 }
 
 func homeCommandGetNextMissingOrderPatient(c *config) error {

@@ -320,11 +320,10 @@ func (s Schedule) Print(c *config, filters []string) {
 		ignoredSet[order] = struct{}{}
 	}
 
-	var newTable [][]string
-
 	for _, filter := range filters {
 		switch filter {
-		case "default":
+		case "defaultOrderFilter":
+			newTable := [][]string{}
 			i := 0
 			for i < len(s.table) {
 				row := s.table[i]
@@ -353,6 +352,25 @@ func (s Schedule) Print(c *config, filters []string) {
 					newTable = append(newTable, s.table[i])
 				}
 				i++
+			}
+
+			s.table = newTable
+		case "defaultPatientFilterDone":
+			newTable := [][]string{}
+			top := 0
+			bottom := 0
+			for top < len(s.table) {
+				bottom = top
+				for bottom+1 < len(s.table) && s.table[bottom+1][0] == "" {
+					bottom++
+				}
+
+				mrn := s.table[top][1]
+				if !c.PatientList[mrn].VisitComplete {
+					newTable = append(newTable, s.table[top:bottom+1]...)
+				}
+
+				top = bottom + 1
 			}
 
 			s.table = newTable
