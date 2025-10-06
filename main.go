@@ -15,6 +15,7 @@ type config struct {
 	pathToIgnoredOrders  string
 	location             Location
 	PatientList          map[string]Patient `json:"patient_list"`
+	patientNameMap       map[string]struct{}
 	commands             commandMapList
 	readlineConfig       *readline.Config
 	readlineCompleterMap map[int]*readline.PrefixCompleter

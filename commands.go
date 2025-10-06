@@ -63,6 +63,11 @@ func getCommands() commandMapList {
 			description: "changes a mark for certain items. i.e. mark complete [patient]",
 			callback:    commandMark,
 		},
+		"remove": {
+			name:        "remove",
+			description: "removes elements depending on location",
+			callback:    commandRemove,
+		},
 	}
 	return commands
 }
@@ -288,6 +293,29 @@ func commandMark(c *config) error {
 
 	default:
 		return fmt.Errorf("error. mark command cannot be used from current node")
+	}
+
+	return nil
+}
+
+func commandRemove(c *config) error {
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
+	}
+	firstArg := c.lastInput[1]
+
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "order":
+			err := homeCommandRemoveOrder(c)
+			if err != nil {
+				return err
+			}
+		}
+
+	default:
+		return fmt.Errorf("error. remove command cannot be used from current node")
 	}
 
 	return nil

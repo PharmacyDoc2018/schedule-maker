@@ -24,6 +24,7 @@ func initREPL() *config {
 	config.commands = getCommands()
 
 	config.PatientList = map[string]Patient{}
+	config.patientNameMap = map[string]struct{}{}
 
 	nodeMap := make(map[int]*LocationNode)
 	nodeMap[0] = &LocationNode{
@@ -91,6 +92,13 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
 		),
+		readline.PcItem("remove",
+			readline.PcItem("order",
+				readline.PcItemDynamic(c.getPatientArgs,
+					readline.PcItemDynamic(c.getPatientOrders),
+				),
+			),
+		),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
@@ -124,6 +132,39 @@ func (c *config) getPatientArgs(input string) []string {
 	}
 
 	return patients
+}
+
+func (c *config) getPatientOrders(input string) []string {
+	orders := []string{}
+	inputParts := strings.Split(input, " ")[2:]
+
+	ptName := ""
+	for i := 0; i < len(inputParts); i++ {
+		if _, ok := c.patientNameMap[strings.Join(inputParts[:i], " ")]; ok {
+			ptName = strings.Join(inputParts[:i], " ")
+			break
+		}
+	}
+	if ptName == "" {
+		return orders
+	}
+
+	mrn := ""
+	for key, val := range c.PatientList {
+		if val.Name == ptName {
+			mrn = key
+			break
+		}
+	}
+	if mrn == "" {
+		return orders
+	}
+
+	for _, order := range c.PatientList[mrn].Orders {
+		orders = append(orders, order)
+	}
+
+	return orders
 }
 
 func (c *config) resetPrefixCompleterMode() {

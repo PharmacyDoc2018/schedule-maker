@@ -26,21 +26,10 @@ func homeCommandAddOrder(c *config) error {
 		return fmt.Errorf("error. too few arguments.\nExpected format: add order [pt name] [order name]")
 	}
 
-	ptList := []string{}
-	for _, val := range c.PatientList {
-		ptList = append(ptList, val.Name)
-	}
-
-	ptNameMap := make(map[string]struct{}, len(ptList))
-	for _, name := range ptList {
-		ptNameMap[name] = struct{}{}
-	}
-	ptList = nil
-
 	ptName, err := func() (string, error) {
 		i := 3
-		for i < len(ptNameMap) {
-			if _, ok := ptNameMap[strings.Join(c.lastInput[2:i], " ")]; ok {
+		for i < len(c.patientNameMap) {
+			if _, ok := c.patientNameMap[strings.Join(c.lastInput[2:i], " ")]; ok {
 				return strings.Join(c.lastInput[2:i], " "), nil
 			}
 			i++

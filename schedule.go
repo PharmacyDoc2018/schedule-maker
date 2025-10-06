@@ -55,6 +55,8 @@ func initScheduledPatients(c *config) error {
 		}
 	}
 
+	c.createPatientNameMap()
+
 	fmt.Println("finding missing orders...")
 	c.FindMissingInfusionOrders()
 
@@ -240,6 +242,12 @@ func (c *config) createPatientList(scheduleRows, ordersRows [][]string) error {
 
 	c.savePatientList()
 	return nil
+}
+
+func (c *config) createPatientNameMap() {
+	for _, val := range c.PatientList {
+		c.patientNameMap[val.Name] = struct{}{}
+	}
 }
 
 func (c *config) savePatientList() error {

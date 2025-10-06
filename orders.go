@@ -117,6 +117,16 @@ func (c *config) AddOrderQuick(mrn, orderName string) {
 	c.AddOrder(mrn, pseudoOrderNum, orderName)
 }
 
+func (c *config) RemoveOrder(mrn, orderName string) error {
+	for key, val := range c.PatientList[mrn].Orders {
+		if val == orderName {
+			delete(c.PatientList[mrn].Orders, key)
+			return nil
+		}
+	}
+	return fmt.Errorf("order %s not found for %s", orderName, c.PatientList[mrn].Name)
+}
+
 func (c *config) FindMissingOrders() {
 	for mrn := range c.PatientList {
 		if len(c.PatientList[mrn].Orders) == noOrders {
