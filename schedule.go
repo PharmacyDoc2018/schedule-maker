@@ -322,6 +322,11 @@ func (s Schedule) LongestOrderName() int {
 	return longestSoFar
 }
 
+func (s Schedule) OrderPrintFormat(order string) string {
+	formattedOrder := strings.ReplaceAll(order, "'", "")
+	return formattedOrder
+}
+
 func (s Schedule) Print(c *config, filters []string) {
 	ignoredSet := make(map[string]struct{}, len(c.IgnoredOrders.List))
 	for _, order := range c.IgnoredOrders.List {
@@ -480,9 +485,9 @@ func (s Schedule) Print(c *config, filters []string) {
 				orderColText += " "
 			}
 			if i == printLine {
-				fmt.Printf("|%s|%s|%s|%s|\n", timeColText, mrnColText, nameColText, orderColText)
+				fmt.Printf("|%s|%s|%s|%s|\n", timeColText, mrnColText, nameColText, s.OrderPrintFormat(orderColText))
 			} else {
-				fmt.Printf("|%s|%s|%s|%s|\n", timeColBufferSpaces, mrnColBufferSpaces, nameColBufferSpaces, orderColText)
+				fmt.Printf("|%s|%s|%s|%s|\n", timeColBufferSpaces, mrnColBufferSpaces, nameColBufferSpaces, s.OrderPrintFormat(orderColText))
 			}
 		}
 		//cBottom++
