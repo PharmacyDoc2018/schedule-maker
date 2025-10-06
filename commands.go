@@ -153,6 +153,9 @@ func commandSelect(c *config) error {
 }
 
 func commandAdd(c *config) error {
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
+	}
 	firstArg := c.lastInput[1]
 
 	switch c.location.allNodes[c.location.currentNodeID].locType {
@@ -161,6 +164,12 @@ func commandAdd(c *config) error {
 		switch firstArg {
 		case "ignoredOrder":
 			err := homeCommandAddIgnoredOrder(c)
+			if err != nil {
+				return err
+			}
+
+		case "order":
+			err := homeCommandAddOrder(c)
 			if err != nil {
 				return err
 			}
