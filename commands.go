@@ -68,6 +68,11 @@ func getCommands() commandMapList {
 			description: "removes elements depending on location",
 			callback:    commandRemove,
 		},
+		"restart": {
+			name:        "restart",
+			description: "restarts the program",
+			callback:    commandRestart,
+		},
 	}
 	return commands
 }
@@ -116,6 +121,16 @@ func commandExit(c *config) error {
 	fmt.Println("closing... goodbye!")
 	c.rl.Close()
 	os.Exit(0)
+	return nil
+}
+
+func commandRestart(c *config) error {
+	c.savePatientList()
+	c.saveIgnoredOrdersList()
+	commandClear(c)
+	c.rl.Close()
+	defer main()
+
 	return nil
 }
 

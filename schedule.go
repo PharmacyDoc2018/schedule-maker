@@ -323,7 +323,7 @@ func (s Schedule) LongestOrderName() int {
 }
 
 func (s Schedule) OrderPrintFormat(order string) string {
-	formattedOrder := strings.ReplaceAll(order, "'", "")
+	formattedOrder := strings.ReplaceAll(order, "'", " ")
 	return formattedOrder
 }
 
