@@ -31,7 +31,6 @@ func main() {
 	}
 
 	config.rl = config.readlineSetup()
-	defer config.rl.Close()
 
 	for {
 		config.readlineLoopStartPreprocess()

@@ -99,6 +99,7 @@ func (c *config) readlineSetup() *readline.Instance {
 				),
 			),
 		),
+		readline.PcItem("reset"),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
@@ -229,5 +230,20 @@ func (c *config) readlineLoopStartPreprocess() {
 			}
 		}
 		fmt.Printf("Infusion Patients(%d). Missing Orders(%d):\n", infusionPatientNum, c.missingOrders.Len())
+
+	case PatientLoc:
+		commandClear(c)
+		mrn := c.location.allNodes[c.location.currentNodeID].name
+		pt := c.PatientList[mrn]
+		fmt.Printf("Selected Patient: %s (%s)\n\n", pt.Name, pt.Mrn)
+		if len(c.PatientList[mrn].Orders) == 0 {
+			fmt.Println("Current Orders: None")
+		} else {
+			fmt.Println("Current Orders:")
+			for _, order := range c.PatientList[mrn].Orders {
+				fmt.Println(" ", order)
+			}
+		}
+		fmt.Println()
 	}
 }
