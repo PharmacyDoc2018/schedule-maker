@@ -205,6 +205,12 @@ func commandAdd(c *config) error {
 				return err
 			}
 
+		case "prepullOrder":
+			err := homeCommandAddPrepullOrder(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("unknown item to add: %s not found", firstArg)
 		}

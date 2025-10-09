@@ -88,6 +88,7 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("order",
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
+			readline.PcItem("prepullOrder"),
 		),
 		readline.PcItem("mark",
 			readline.PcItem("done",

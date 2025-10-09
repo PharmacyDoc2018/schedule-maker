@@ -6,6 +6,10 @@ import (
 )
 
 func homeCommandAddIgnoredOrder(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing order argument")
+	}
+
 	order := strings.Join(c.lastInput[2:], " ")
 	storedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
 
@@ -17,6 +21,26 @@ func homeCommandAddIgnoredOrder(c *config) error {
 
 	c.IgnoredOrders.List = append(c.IgnoredOrders.List, storedOrder)
 	fmt.Printf("order added: %s will be ignored\n", order)
+
+	return nil
+}
+
+func homeCommandAddPrepullOrder(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing order argument")
+	}
+
+	order := strings.Join(c.lastInput[2:], " ")
+	storedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
+
+	for _, item := range c.PrepullOrders.List {
+		if storedOrder == item {
+			return fmt.Errorf("entry already exists on the Prepull Orders list")
+		}
+	}
+
+	c.PrepullOrders.List = append(c.PrepullOrders.List, storedOrder)
+	fmt.Printf("order: %s added to Prepull Orders list\n", order)
 
 	return nil
 }
