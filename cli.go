@@ -100,6 +100,7 @@ func (c *config) readlineSetup() *readline.Instance {
 			),
 		),
 		readline.PcItem("reset"),
+		readline.PcItem("save"),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(

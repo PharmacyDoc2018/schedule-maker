@@ -73,6 +73,11 @@ func getCommands() commandMapList {
 			description: "restarts the program",
 			callback:    commandRestart,
 		},
+		"save": {
+			name:        "save",
+			description: "saves data",
+			callback:    commandSave,
+		},
 	}
 	return commands
 }
@@ -130,6 +135,15 @@ func commandRestart(c *config) error {
 	commandClear(c)
 	c.rl.Close()
 	defer main()
+
+	return nil
+}
+
+func commandSave(c *config) error {
+	fmt.Println("saving data...")
+	c.savePatientList()
+	c.saveIgnoredOrdersList()
+	fmt.Println("save complete!")
 
 	return nil
 }
