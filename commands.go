@@ -306,6 +306,14 @@ func commandMark(c *config) error {
 			return fmt.Errorf("error. %s is not a markable item", firstArg)
 		}
 
+	case PatientLoc:
+		switch firstArg {
+		case "order":
+			err := patientCommandMarkOrder(c)
+			if err != nil {
+				return err
+			}
+		}
 	default:
 		return fmt.Errorf("error. mark command cannot be used from current node")
 	}

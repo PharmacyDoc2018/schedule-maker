@@ -108,6 +108,11 @@ func (c *config) readlineSetup() *readline.Instance {
 		),
 		readline.PcItem("home"),
 		readline.PcItem("exit"),
+		readline.PcItem("mark",
+			readline.PcItem("order",
+				readline.PcItemDynamic(c.GetPatientOrdersFromLoc),
+			),
+		),
 	)
 
 	completerMode[int(ReviewNode)] = readline.NewPrefixCompleter(
@@ -161,6 +166,17 @@ func (c *config) getPatientOrders(input string) []string {
 		return orders
 	}
 
+	for _, order := range c.PatientList[mrn].Orders {
+		orders = append(orders, order)
+	}
+
+	return orders
+}
+
+func (c *config) GetPatientOrdersFromLoc(input string) []string {
+	orders := []string{}
+
+	mrn := c.location.allNodes[c.location.currentNodeID].name
 	for _, order := range c.PatientList[mrn].Orders {
 		orders = append(orders, order)
 	}

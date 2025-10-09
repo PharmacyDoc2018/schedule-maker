@@ -37,3 +37,30 @@ func homeCommandMarkDone(c *config) error {
 	return nil
 
 }
+
+func patientCommandMarkOrder(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing order argument")
+	}
+	order := strings.Join(c.lastInput[2:], " ")
+
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+
+	updatedPatient, err := func(mrn, order string) (Patient, error) {
+		patient := c.PatientList[mrn]
+		for key, val := range patient.Orders {
+			if val == order {
+				patient.Orders[key] = "'" + order
+				return patient, nil
+			}
+		}
+		return Patient{}, fmt.Errorf("error. order %s not found", order)
+	}(mrn, order)
+	if err != nil {
+		return err
+	}
+
+	c.PatientList[mrn] = updatedPatient
+
+	return nil
+}
