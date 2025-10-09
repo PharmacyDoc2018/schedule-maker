@@ -13,12 +13,14 @@ func initREPL() *config {
 	godotenv.Load(".env")
 	pathToSch := os.Getenv("SCH_PATH")
 	pathToSave := os.Getenv("SAVE_PATH")
+	pathToPrepullOrders := os.Getenv("PREPULL_ORDERS_PATH")
 	pathToIgnoredOrders := os.Getenv("IGNORED_ORDERS_PATH")
 
 	config := &config{
 		pathToSch:           pathToSch,
 		pathToSave:          pathToSave,
 		pathToIgnoredOrders: pathToIgnoredOrders,
+		pathToPrepullOrders: pathToPrepullOrders,
 	}
 
 	config.commands = getCommands()

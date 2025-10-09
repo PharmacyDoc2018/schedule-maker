@@ -119,10 +119,7 @@ func commandHome(c *config) error {
 }
 
 func commandExit(c *config) error {
-	fmt.Println("saving schedule...")
-	c.savePatientList()
-	fmt.Println("schedule saved!")
-	c.saveIgnoredOrdersList()
+	commandSave(c)
 	fmt.Println("closing... goodbye!")
 	c.rl.Close()
 	os.Exit(0)
@@ -130,8 +127,7 @@ func commandExit(c *config) error {
 }
 
 func commandRestart(c *config) error {
-	c.savePatientList()
-	c.saveIgnoredOrdersList()
+	commandSave(c)
 	commandClear(c)
 	c.rl.Close()
 	defer main()
@@ -143,6 +139,7 @@ func commandSave(c *config) error {
 	fmt.Println("saving data...")
 	c.savePatientList()
 	c.saveIgnoredOrdersList()
+	c.savePrepullOrdersList()
 	fmt.Println("save complete!")
 
 	return nil

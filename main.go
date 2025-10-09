@@ -10,9 +10,11 @@ type config struct {
 	missingOrders        missingOrdersQueue
 	lastInput            []string
 	IgnoredOrders        IgnoredOrders
+	PrepullOrders        PrepullOrders
 	pathToSch            string
 	pathToSave           string
 	pathToIgnoredOrders  string
+	pathToPrepullOrders  string
 	location             Location
 	PatientList          map[string]Patient `json:"patient_list"`
 	patientNameMap       map[string]struct{}

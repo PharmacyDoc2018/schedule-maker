@@ -65,6 +65,11 @@ func initScheduledPatients(c *config) error {
 		fmt.Println(err.Error())
 	}
 
+	err = c.PullPrepullOrdersList()
+	if err != nil {
+		return err
+	}
+
 	fmt.Println()
 	return nil
 }
