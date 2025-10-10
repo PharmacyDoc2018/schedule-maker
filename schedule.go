@@ -55,6 +55,20 @@ func initScheduledPatients(c *config) error {
 		}
 	}
 
+	randApptTime := time.Time{}
+	for _, pt := range c.PatientList {
+		for _, apptTime := range pt.AppointmentTimes {
+			randApptTime = apptTime
+			break
+		}
+		break
+	}
+	nowYear, nowMonth, nowDay := time.Now().Date()
+	schYear, schMonth, schDay := randApptTime.Date()
+	if !(nowYear == schYear && nowMonth == schMonth && nowDay == schDay) {
+		fmt.Println("WARNING: Schedule appears to be old")
+	}
+
 	c.createPatientNameMap()
 
 	fmt.Println("finding missing orders...")
