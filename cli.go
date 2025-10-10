@@ -73,6 +73,7 @@ func (c *config) readlineSetup() *readline.Instance {
 					readline.PcItem("-ao"),
 				),
 			),
+			readline.PcItem("prepullOrders"),
 			readline.PcItem("next",
 				readline.PcItem("mop"),
 				readline.PcItem("missingOrderPatient"),

@@ -232,16 +232,20 @@ func commandAdd(c *config) error {
 }
 
 func commandGet(c *config) error {
-	// --  input error handling
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
+	}
 
 	firstArg := c.lastInput[1]
-	secondArg := c.lastInput[2]
 
 	switch c.location.allNodes[c.location.currentNodeID].locType {
 	case Home:
 		switch firstArg {
 		case "schedule":
-
+			if len(c.lastInput) < 3 {
+				return fmt.Errorf("error. missing schedule type")
+			}
+			secondArg := c.lastInput[2]
 			switch secondArg {
 			case "infusion", "-i", "inf":
 				homeCommandGetScheduleInf(c)
@@ -256,6 +260,10 @@ func commandGet(c *config) error {
 			}
 
 		case "next":
+			if len(c.lastInput) < 3 {
+				return fmt.Errorf("error. missing item")
+			}
+			secondArg := c.lastInput[2]
 
 			switch secondArg {
 			case "missingOrderPatient", "mop":
@@ -268,6 +276,15 @@ func commandGet(c *config) error {
 			default:
 				return fmt.Errorf("error. unknown next item: %s not found", secondArg)
 			}
+
+		case "prepullOrders":
+			commandClear(c)
+			err := homeCommandGetPrepullOrders(c)
+			if err != nil {
+				return err
+			}
+
+			return nil
 
 		default:
 			return fmt.Errorf("error. unknown argument: %s not found", firstArg)
