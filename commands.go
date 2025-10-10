@@ -135,6 +135,14 @@ func commandRestart(c *config) error {
 	return nil
 }
 
+func commandRestartNoSave(c *config) error {
+	commandClear(c)
+	c.rl.Close()
+	defer main()
+
+	return nil
+}
+
 func commandSave(c *config) error {
 	fmt.Println("saving data...")
 	c.savePatientList()
@@ -369,6 +377,15 @@ func commandRemove(c *config) error {
 			if err != nil {
 				return err
 			}
+
+		case "saveData":
+			err := homeCommandRemoveSaveData(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s is not a removable element", firstArg)
 		}
 
 	default:

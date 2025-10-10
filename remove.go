@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -48,6 +49,16 @@ func homeCommandRemoveOrder(c *config) error {
 	}
 
 	fmt.Printf("removed order %s from %s\n", order, ptName)
+
+	return nil
+}
+
+func homeCommandRemoveSaveData(c *config) error {
+	err := os.Remove(c.pathToSave)
+	if err != nil {
+		return err
+	}
+	commandRestartNoSave(c)
 
 	return nil
 }
