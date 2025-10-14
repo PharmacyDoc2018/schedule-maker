@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -266,6 +267,26 @@ func (c *config) readlineLoopStartPreprocess() {
 		mrn := c.location.allNodes[c.location.currentNodeID].name
 		pt := c.PatientList[mrn]
 		fmt.Printf("Selected Patient: %s (%s)\n\n", pt.Name, pt.Mrn)
+
+		if len(c.PatientList[mrn].AppointmentTimes) == 0 {
+			fmt.Println("Appointments: None")
+		} else {
+			fmt.Println("Appointments:")
+			apptSlices := []string{}
+			for key := range c.PatientList[mrn].AppointmentTimes {
+				apptSlices = append(apptSlices, key)
+			}
+
+			sort.Slice(apptSlices, func(i, j int) bool {
+				return c.PatientList[mrn].AppointmentTimes[apptSlices[i]].Before(c.PatientList[mrn].AppointmentTimes[apptSlices[j]])
+			})
+
+			for _, appt := range apptSlices {
+				fmt.Printf("  %s: %s\n", appt, c.PatientList[mrn].AppointmentTimes[appt].Format(timeFormat))
+			}
+			fmt.Println()
+		}
+
 		if len(c.PatientList[mrn].Orders) == 0 {
 			fmt.Println("Current Orders: None")
 		} else {
