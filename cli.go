@@ -106,6 +106,14 @@ func (c *config) readlineSetup() *readline.Instance {
 		),
 		readline.PcItem("reset"),
 		readline.PcItem("save"),
+		readline.PcItem("change",
+			readline.PcItem("apptTimeInf",
+				readline.PcItemDynamic(c.getPatientArgs),
+			),
+			readline.PcItem("appointmentTimeInfusion",
+				readline.PcItemDynamic(c.getPatientArgs),
+			),
+		),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
@@ -268,4 +276,21 @@ func (c *config) readlineLoopStartPreprocess() {
 		}
 		fmt.Println()
 	}
+}
+
+func (c *config) FindPatientInInput(start int) (mrn string, err error) {
+	i := start + 1
+	for i < len(c.patientNameMap) {
+		if _, ok := c.patientNameMap[strings.Join(c.lastInput[start:i], " ")]; ok {
+			ptName := strings.Join(c.lastInput[2:i], " ")
+			for key, val := range c.PatientList {
+				if val.Name == ptName {
+					return key, nil
+				}
+			}
+		}
+		i++
+	}
+	return "", fmt.Errorf("error. patient not found")
+
 }

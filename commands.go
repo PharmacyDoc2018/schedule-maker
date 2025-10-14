@@ -78,6 +78,11 @@ func getCommands() commandMapList {
 			description: "saves data",
 			callback:    commandSave,
 		},
+		"change": {
+			name:        "change",
+			description: "change the value of an item. i.e. appointment time.",
+			callback:    commandChange,
+		},
 	}
 	return commands
 }
@@ -169,9 +174,36 @@ func commandClear(c *config) error {
 	return nil
 }
 
+func commandChange(c *config) error {
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
+	}
+
+	firstArg := c.lastInput[1]
+
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "apptTimeInf", "appointmentTimeInfusion":
+			err := homeCommandChangeApptTimeInf(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s not a changeable item", firstArg)
+		}
+
+	default:
+		return fmt.Errorf("error. cannot use the change command at current location")
+	}
+
+	return nil
+}
+
 func commandSelect(c *config) error {
 	if len(c.lastInput) < 2 {
-		return fmt.Errorf("error too few arguments")
+		return fmt.Errorf("error. too few arguments")
 	}
 
 	firstArg := c.lastInput[1]

@@ -50,31 +50,12 @@ func homeCommandAddOrder(c *config) error {
 		return fmt.Errorf("error. too few arguments.\nExpected format: add order [pt name] [order name]")
 	}
 
-	ptName, err := func() (string, error) {
-		i := 3
-		for i < len(c.patientNameMap) {
-			if _, ok := c.patientNameMap[strings.Join(c.lastInput[2:i], " ")]; ok {
-				return strings.Join(c.lastInput[2:i], " "), nil
-			}
-			i++
-		}
-		return "", fmt.Errorf("error. patient not found")
-	}()
+	mrn, err := c.FindPatientInInput(2)
 	if err != nil {
 		return err
 	}
 
-	mrn := ""
-	for key, val := range c.PatientList {
-		if val.Name == ptName {
-			mrn = key
-			break
-		}
-	}
-	if mrn == "" {
-		return fmt.Errorf("error. mrn not found for %s", ptName)
-	}
-
+	ptName := c.PatientList[mrn].Name
 	if len(ptName)+2 == len(c.lastInput) {
 		return fmt.Errorf("error. no order entered")
 	}
