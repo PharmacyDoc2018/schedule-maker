@@ -416,6 +416,11 @@ func commandRemove(c *config) error {
 				return err
 			}
 
+		case "ignoredOrder":
+			err := homeCommandRemoveIgnoredOrder(c)
+			if err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("error. %s is not a removable element", firstArg)
 		}

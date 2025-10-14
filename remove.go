@@ -43,3 +43,28 @@ func homeCommandRemoveSaveData(c *config) error {
 
 	return nil
 }
+
+func homeCommandRemoveIgnoredOrder(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing order argument")
+	}
+
+	order := strings.Join(c.lastInput[2:], " ")
+	storedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
+
+	oldList := c.IgnoredOrders.List
+	newList := []string{}
+	for i, item := range oldList {
+		if storedOrder != item {
+			newList = append(newList, item)
+		} else {
+			newList = append(newList, oldList[i+1:]...)
+			c.IgnoredOrders.List = newList
+			oldList = nil
+			fmt.Printf("%s removed from Ignored Orders List\n", order)
+			return nil
+		}
+	}
+	return fmt.Errorf("error. order: %s not found in Ignored Orders List", order)
+
+}

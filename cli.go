@@ -103,6 +103,7 @@ func (c *config) readlineSetup() *readline.Instance {
 					readline.PcItemDynamic(c.getPatientOrders),
 				),
 			),
+			readline.PcItem("ignoredOrder"),
 			readline.PcItem("saveData"),
 		),
 		readline.PcItem("reset"),
