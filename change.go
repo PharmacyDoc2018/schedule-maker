@@ -22,19 +22,36 @@ func homeCommandChangeApptTimeInf(c *config) error {
 	}
 
 	timeString := strings.Join(c.lastInput[timePos:], " ")
-	newApptTime, err := time.Parse(timeFormat, timeString)
+	newApptTimeOnly, err := time.Parse(timeFormat, timeString)
 	if err != nil {
 		return err
 	}
 
 	patient := c.PatientList[mrn]
-	oldApptTime := time.Time{}
-	for key := range patient.AppointmentTimes {
+	for key, val := range patient.AppointmentTimes {
 		if strings.Contains(key, infusionAppointmentTag) {
+			oldApptTime := val
+			newApptTime := time.Date(
+				oldApptTime.Year(),
+				oldApptTime.Month(),
+				oldApptTime.Day(),
+				newApptTimeOnly.Hour(),
+				newApptTimeOnly.Minute(),
+				0,
+				0,
+				oldApptTime.Location(),
+			)
+
 			if oldApptTime.Equal(newApptTime) {
 				return fmt.Errorf("error. %s's infusion appointment is already scheduled at %s", patient.Name, newApptTime.Format(timeFormat))
 			}
-			patient.AppointmentTimes[key] = newApptTime
+
+			for key := range patient.AppointmentTimes {
+				if strings.Contains(key, infusionAppointmentTag) {
+					patient.AppointmentTimes[key] = newApptTime
+				}
+			}
+
 			c.PatientList[mrn] = patient
 			fmt.Printf("infusion appointment for %s changed from %s to %s.\n", patient.Name, oldApptTime.Format(timeFormat), newApptTime.Format(timeFormat))
 			return nil
