@@ -68,3 +68,22 @@ func homeCommandRemoveIgnoredOrder(c *config) error {
 	return fmt.Errorf("error. order: %s not found in Ignored Orders List", order)
 
 }
+
+func patientCommandRemoveOrder(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. too few arguments.\nExpected format: remove order [pt name] [order name]")
+	}
+
+	order := strings.Join(c.lastInput[2:], " ")
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+	patient := c.PatientList[mrn]
+
+	for key, val := range patient.Orders {
+		if val == order {
+			delete(patient.Orders, key)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("error. order: %s not found", order)
+}

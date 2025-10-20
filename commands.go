@@ -425,6 +425,17 @@ func commandRemove(c *config) error {
 			return fmt.Errorf("error. %s is not a removable element", firstArg)
 		}
 
+	case PatientLoc:
+		switch firstArg {
+		case "order":
+			err := patientCommandRemoveOrder(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s not a removable element", firstArg)
+		}
 	default:
 		return fmt.Errorf("error. remove command cannot be used from current node")
 	}
