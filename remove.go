@@ -81,6 +81,7 @@ func patientCommandRemoveOrder(c *config) error {
 	for key, val := range patient.Orders {
 		if val == order {
 			delete(patient.Orders, key)
+			c.PatientList[mrn] = patient
 			return nil
 		}
 	}

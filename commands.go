@@ -28,6 +28,11 @@ func getCommands() commandMapList {
 			description: "returns to home location",
 			callback:    commandHome,
 		},
+		"..": {
+			name:        "..",
+			description: "returns to home location",
+			callback:    commandHome,
+		},
 		"select": {
 			name:        "select",
 			description: "select a location to move to",
@@ -194,6 +199,17 @@ func commandChange(c *config) error {
 			return fmt.Errorf("error. %s not a changeable item", firstArg)
 		}
 
+	case PatientLoc:
+		switch firstArg {
+		case "apptTimeInf", "appointmentTimeInfusion":
+			err := patientCommandChangeApptTimeInf(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s not a changeable item", firstArg)
+		}
 	default:
 		return fmt.Errorf("error. cannot use the change command at current location")
 	}

@@ -134,6 +134,10 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItemDynamic(c.GetPatientOrdersFromLoc),
 			),
 		),
+		readline.PcItem("change",
+			readline.PcItem("apptTimeInf"),
+			readline.PcItem("appointmentTimeInfusion"),
+		),
 	)
 
 	completerMode[int(ReviewNode)] = readline.NewPrefixCompleter(
