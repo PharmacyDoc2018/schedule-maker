@@ -7,58 +7,62 @@ import (
 	"strings"
 )
 
-type PtSupplyOrder struct {
-	Mrn        string `json:"mrn"`
-	Medication string `json:"medication"`
-}
-
 type PtSupplyOrders struct {
-	List []PtSupplyOrder `json:"list"`
+	Map map[string]map[string]struct{} `json:"map"`
 }
 
 func (p *PtSupplyOrders) IsPatientSupplied(mrn, order string) bool {
 	trimmedOrder := strings.ToLower(order)
-	for _, order := range p.List {
-		if order.Mrn == mrn {
-			if strings.Contains(trimmedOrder, order.Medication) {
-				return true
-			}
+
+	ptSuppliedOrders, ok := p.Map[mrn]
+	if !ok {
+		return ok
+	}
+
+	for ptSuppliedOrder := range ptSuppliedOrders {
+		if strings.Contains(trimmedOrder, ptSuppliedOrder) {
+			return true
 		}
 	}
+
 	return false
 }
 
 func (p *PtSupplyOrders) AddOrder(mrn, medication string) error {
 	trimmedMed := strings.ToLower(medication)
 
-	newEntry := PtSupplyOrder{
-		Mrn:        mrn,
-		Medication: trimmedMed,
-	}
-
-	for _, order := range p.List {
-		if order == newEntry {
-			return fmt.Errorf("error. Pt Supplied Order already exists")
+	if _, ok := p.Map[mrn]; !ok {
+		p.Map[mrn] = map[string]struct{}{}
+	} else {
+		for med := range p.Map[mrn] {
+			if med == trimmedMed {
+				return fmt.Errorf("error. medication already marked as patient supplied")
+			}
 		}
 	}
 
-	p.List = append(p.List, newEntry)
+	p.Map[mrn][trimmedMed] = struct{}{}
 	return nil
 }
 
 func (p *PtSupplyOrders) RemoveOrder(mrn, order string) error {
 	trimmedOrder := strings.ToLower(order)
 
-	for i, order := range p.List {
-		if mrn == order.Mrn {
-			if strings.Contains(trimmedOrder, order.Medication) {
-				p.List = append(p.List[:i], p.List[i+1:]...)
-				return nil
+	if _, ok := p.Map[mrn]; !ok {
+		return fmt.Errorf("error. patient does not have any patient supplied medications")
+	}
+
+	for med := range p.Map[mrn] {
+		if strings.Contains(trimmedOrder, med) {
+			delete(p.Map[mrn], med)
+			if len(p.Map[mrn]) == 0 {
+				delete(p.Map, mrn)
 			}
+			return nil
 		}
 	}
 
-	return fmt.Errorf("error. Pt Supplied Order not found")
+	return fmt.Errorf("error. patient supplied medication not found for %s", order)
 }
 
 func (c *config) PullPtSupplyOrdersList() error {
