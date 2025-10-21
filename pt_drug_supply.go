@@ -70,7 +70,7 @@ func (c *config) PullPtSupplyOrdersList() error {
 		}
 
 		ptSupplyOrders := PtSupplyOrders{}
-		json.Unmarshal(data, &ptSupplyOrders)
+		err = json.Unmarshal(data, &ptSupplyOrders)
 		if err != nil {
 			return err
 		}
