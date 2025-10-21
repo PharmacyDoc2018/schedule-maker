@@ -305,7 +305,11 @@ func (c *config) readlineLoopStartPreprocess() {
 		} else {
 			fmt.Println("Current Orders:")
 			for _, order := range c.PatientList[mrn].Orders {
-				fmt.Println(" ", order)
+				if c.PtSupplyOrders.IsPatientSupplied(mrn, order) {
+					fmt.Println(" ", "[Pt Supplied]", order, "[Pt Supplied]")
+				} else {
+					fmt.Println(" ", order)
+				}
 			}
 		}
 		fmt.Println()
