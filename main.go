@@ -53,6 +53,8 @@ func main() {
 		fmt.Println(err.Error())
 	}
 
+	fmt.Println()
+
 	config.rl = config.readlineSetup()
 
 	for {

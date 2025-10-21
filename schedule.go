@@ -69,7 +69,6 @@ func initScheduledPatients(c *config) error {
 		fmt.Println("WARNING: Schedule appears to be old")
 	}
 
-	fmt.Println()
 	return nil
 }
 

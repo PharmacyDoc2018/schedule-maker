@@ -130,6 +130,7 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("order",
 				readline.PcItemDynamic(c.GetPatientOrdersFromLoc),
 			),
+			readline.PcItem("ptSupplied"),
 		),
 		readline.PcItem("remove",
 			readline.PcItem("order",

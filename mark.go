@@ -64,3 +64,20 @@ func patientCommandMarkOrder(c *config) error {
 
 	return nil
 }
+
+func patientCommandMarkPtSupplied(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing order argument")
+	}
+
+	medication := strings.Join(c.lastInput[2:], " ")
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+
+	err := c.PtSupplyOrders.AddOrder(mrn, medication)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

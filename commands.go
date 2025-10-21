@@ -404,6 +404,15 @@ func commandMark(c *config) error {
 			if err != nil {
 				return err
 			}
+
+		case "ptSupplied":
+			err := patientCommandMarkPtSupplied(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s is not a markable item", firstArg)
 		}
 	default:
 		return fmt.Errorf("error. mark command cannot be used from current node")
