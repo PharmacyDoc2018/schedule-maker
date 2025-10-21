@@ -69,21 +69,6 @@ func initScheduledPatients(c *config) error {
 		fmt.Println("WARNING: Schedule appears to be old")
 	}
 
-	c.createPatientNameMap()
-
-	fmt.Println("finding missing orders...")
-	c.FindMissingInfusionOrders()
-
-	err = c.PullIgnoredOrdersList()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	err = c.PullPrepullOrdersList()
-	if err != nil {
-		return err
-	}
-
 	fmt.Println()
 	return nil
 }

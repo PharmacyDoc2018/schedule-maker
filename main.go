@@ -11,10 +11,12 @@ type config struct {
 	lastInput            []string
 	IgnoredOrders        IgnoredOrders
 	PrepullOrders        PrepullOrders
+	PtSupplyOrders       PtSupplyOrders
 	pathToSch            string
 	pathToSave           string
 	pathToIgnoredOrders  string
 	pathToPrepullOrders  string
+	pathToPtSupplyOrders string
 	location             Location
 	PatientList          map[string]Patient `json:"patient_list"`
 	patientNameMap       map[string]struct{}
@@ -30,6 +32,25 @@ func main() {
 	err := initScheduledPatients(config)
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	config.createPatientNameMap()
+
+	config.FindMissingInfusionOrders()
+
+	err = config.PullIgnoredOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = config.PullPrepullOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = config.PullPtSupplyOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
 	config.rl = config.readlineSetup()

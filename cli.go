@@ -16,12 +16,14 @@ func initREPL() *config {
 	pathToSave := os.Getenv("SAVE_PATH")
 	pathToPrepullOrders := os.Getenv("PREPULL_ORDERS_PATH")
 	pathToIgnoredOrders := os.Getenv("IGNORED_ORDERS_PATH")
+	pathToPtSupplyOrders := os.Getenv("PT_SUPPLY_ORDERS_PATH")
 
 	config := &config{
-		pathToSch:           pathToSch,
-		pathToSave:          pathToSave,
-		pathToIgnoredOrders: pathToIgnoredOrders,
-		pathToPrepullOrders: pathToPrepullOrders,
+		pathToSch:            pathToSch,
+		pathToSave:           pathToSave,
+		pathToIgnoredOrders:  pathToIgnoredOrders,
+		pathToPrepullOrders:  pathToPrepullOrders,
+		pathToPtSupplyOrders: pathToPtSupplyOrders,
 	}
 
 	config.commands = getCommands()

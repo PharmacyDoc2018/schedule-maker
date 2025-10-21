@@ -158,6 +158,7 @@ func commandSave(c *config) error {
 	c.savePatientList()
 	c.saveIgnoredOrdersList()
 	c.savePrepullOrdersList()
+	c.savePtSupplyOrderList()
 	fmt.Println("save complete!")
 
 	return nil
