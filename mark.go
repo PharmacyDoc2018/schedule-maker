@@ -38,6 +38,32 @@ func homeCommandMarkDone(c *config) error {
 
 }
 
+func homeCommandMarkPtSupplied(c *config) error {
+	if len(c.lastInput) < 4 {
+		return fmt.Errorf("error. too few arguments\nsyntax: mark ptSupplied [pt name] [medication]")
+	}
+
+	mrn, err := c.FindPatientInInput(2)
+	if err != nil {
+		return err
+	}
+
+	ptName := c.PatientList[mrn].Name
+	commandPatientLen := len(strings.Split(ptName, " ")) + 2
+	if len(c.lastInput) == commandPatientLen {
+		return fmt.Errorf("error. missing medication argument")
+	}
+
+	medication := strings.Join(c.lastInput[commandPatientLen:], " ")
+
+	err = c.PtSupplyOrders.AddOrder(mrn, medication)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func patientCommandMarkOrder(c *config) error {
 	if len(c.lastInput) < 3 {
 		return fmt.Errorf("error. missing order argument")

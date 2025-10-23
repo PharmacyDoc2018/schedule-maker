@@ -393,6 +393,12 @@ func commandMark(c *config) error {
 				return err
 			}
 
+		case "ptSupplied":
+			err := homeCommandMarkPtSupplied(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s is not a markable item", firstArg)
 		}
