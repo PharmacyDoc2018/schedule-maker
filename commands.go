@@ -465,6 +465,12 @@ func commandRemove(c *config) error {
 				return err
 			}
 
+		case "ptSupplied":
+			err := patientCommandRemovePtSupplied(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s not a removable element", firstArg)
 		}

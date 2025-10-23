@@ -61,6 +61,7 @@ func homeCommandMarkPtSupplied(c *config) error {
 		return err
 	}
 
+	fmt.Printf("%s marked as Pt Supplied for %s\n", medication, ptName)
 	return nil
 }
 

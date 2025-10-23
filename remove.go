@@ -88,3 +88,20 @@ func patientCommandRemoveOrder(c *config) error {
 
 	return fmt.Errorf("error. order: %s not found", order)
 }
+
+func patientCommandRemovePtSupplied(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing medication argument")
+	}
+
+	order := strings.Join(c.lastInput[2:], " ")
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+
+	err := c.PtSupplyOrders.RemoveOrder(mrn, order)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
