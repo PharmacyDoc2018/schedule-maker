@@ -62,6 +62,25 @@ func homeCommandRemoveIgnoredOrder(c *config) error {
 
 }
 
+func homeCommandRemovePtSupplied(c *config) error {
+	if len(c.lastInput) < 4 {
+		return fmt.Errorf("error. too few arguments\nSyntax: remove ptSupplied [pt name] [order]")
+	}
+
+	mrn, ptName, order, err := c.FindPatientItemInInput(2, "order")
+	if err != nil {
+		return err
+	}
+
+	err = c.PtSupplyOrders.RemoveOrder(mrn, order)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s for %s removed from Pt Supplied list\n", order, ptName)
+	return nil
+}
+
 func patientCommandRemoveOrder(c *config) error {
 	if len(c.lastInput) < 3 {
 		return fmt.Errorf("error. too few arguments.\nExpected format: remove order [pt name] [order name]")

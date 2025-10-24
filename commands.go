@@ -459,6 +459,12 @@ func commandRemove(c *config) error {
 			if err != nil {
 				return err
 			}
+		case "ptSupplied":
+			err := homeCommandRemovePtSupplied(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s is not a removable element", firstArg)
 		}

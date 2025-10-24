@@ -62,7 +62,7 @@ func (p *PtSupplyOrders) RemoveOrder(mrn, order string) error {
 		}
 	}
 
-	return fmt.Errorf("error. patient supplied medication not found for %s", order)
+	return fmt.Errorf("error. patient supplied %s not found for that patient", order)
 }
 
 func (c *config) PullPtSupplyOrdersList() error {
