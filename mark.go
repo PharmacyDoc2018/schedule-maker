@@ -65,6 +65,35 @@ func homeCommandMarkPtSupplied(c *config) error {
 	return nil
 }
 
+func homeCommandMarkOrder(c *config) error {
+	if len(c.lastInput) < 4 {
+		return fmt.Errorf("error. too few arguments\nsyntax: mark order [pt name] [order]")
+	}
+
+	mrn, _, order, err := c.FindPatientItemInInput(2, "order")
+	if err != nil {
+		return err
+	}
+
+	updatedPatient, err := func(mrn, order string) (Patient, error) {
+		patient := c.PatientList[mrn]
+		for key, val := range patient.Orders {
+			if val == order {
+				patient.Orders[key] = "'" + order
+				return patient, nil
+			}
+		}
+		return Patient{}, fmt.Errorf("error. order %s not found", order)
+	}(mrn, order)
+	if err != nil {
+		return err
+	}
+
+	c.PatientList[mrn] = updatedPatient
+	return nil
+
+}
+
 func patientCommandMarkOrder(c *config) error {
 	if len(c.lastInput) < 3 {
 		return fmt.Errorf("error. missing order argument")

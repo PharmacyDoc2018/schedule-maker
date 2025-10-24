@@ -399,6 +399,12 @@ func commandMark(c *config) error {
 				return err
 			}
 
+		case "order":
+			err := homeCommandMarkOrder(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s is not a markable item", firstArg)
 		}
@@ -474,6 +480,7 @@ func commandRemove(c *config) error {
 		default:
 			return fmt.Errorf("error. %s not a removable element", firstArg)
 		}
+
 	default:
 		return fmt.Errorf("error. remove command cannot be used from current node")
 	}

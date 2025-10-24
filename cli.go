@@ -99,6 +99,11 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("done",
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
+			readline.PcItem("order",
+				readline.PcItemDynamic(c.getPatientArgs,
+					readline.PcItemDynamic(c.getPatientOrders),
+				),
+			),
 			readline.PcItem("ptSupplied",
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
@@ -338,4 +343,21 @@ func (c *config) FindPatientInInput(start int) (mrn string, err error) {
 	}
 	return "", fmt.Errorf("error. patient not found")
 
+}
+
+func (c *config) FindPatientItemInInput(start int, itemType string) (mrn, ptName, item string, err error) {
+	mrn, err = c.FindPatientInInput(start)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	ptName = c.PatientList[mrn].Name
+	commandPatientLen := len(strings.Split(ptName, " ")) + start
+	if len(c.lastInput) == commandPatientLen {
+		return "", "", "", fmt.Errorf("error. missing %s argument", itemType)
+	}
+
+	item = strings.Join(c.lastInput[commandPatientLen:], " ")
+
+	return mrn, ptName, item, nil
 }
