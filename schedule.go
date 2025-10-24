@@ -326,8 +326,9 @@ func (s Schedule) LongestOrderName() int {
 }
 
 func (s Schedule) OrderPrintFormat(order string) string {
-	formattedOrder := strings.ReplaceAll(order, "'", " ")
-	return formattedOrder
+	order = strings.ReplaceAll(order, "'", " ")
+	order = strings.ReplaceAll(order, "*", "**Pt Supply** ")
+	return order
 }
 
 func (s Schedule) Print(c *config, filters []string) {
@@ -398,6 +399,24 @@ func (s Schedule) Print(c *config, filters []string) {
 
 	nameColBuffer := s.LongestPatientName() + s.colSpaceBuffer
 	orderColBuffer := s.LongestOrderName() + s.colSpaceBuffer
+
+	hasPtSuppliedOrders := false
+	currentMRN := ""
+	for i, row := range s.table {
+		if row[1] != "" {
+			currentMRN = row[1]
+		}
+		if c.PtSupplyOrders.IsPatientSupplied(currentMRN, row[3]) {
+			if !hasPtSuppliedOrders {
+				hasPtSuppliedOrders = true
+			}
+			s.table[i][3] = "*" + row[3]
+		}
+	}
+
+	if hasPtSuppliedOrders {
+		orderColBuffer += 14
+	}
 
 	rowSeperator := " "
 	rowSeperatorLen := timeColBuffer + mrnColBuffer + nameColBuffer + orderColBuffer + s.colSpaceBuffer + 1
