@@ -50,18 +50,11 @@ func homeCommandAddOrder(c *config) error {
 		return fmt.Errorf("error. too few arguments.\nExpected format: add order [pt name] [order name]")
 	}
 
-	mrn, err := c.FindPatientInInput(2)
+	mrn, ptName, order, err := c.FindPatientItemInInput(2, "order")
 	if err != nil {
 		return err
 	}
 
-	ptName := c.PatientList[mrn].Name
-	if len(ptName)+2 == len(c.lastInput) {
-		return fmt.Errorf("error. no order entered")
-	}
-
-	ptNameLen := len(strings.Split(ptName, " "))
-	order := strings.Join(c.lastInput[ptNameLen+2:], " ")
 	c.AddOrderQuick(mrn, order)
 
 	fmt.Printf("order: %s added for %s\n", order, ptName)
