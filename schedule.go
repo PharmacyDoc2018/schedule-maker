@@ -284,6 +284,8 @@ type Schedule struct {
 	colSpaceBuffer int
 }
 
+const ptSupplyBuffer = 14
+
 // row[0] == time
 // row[1] == MRN
 // row[2] == name
@@ -327,7 +329,44 @@ func (s Schedule) LongestOrderName() int {
 
 func (s Schedule) OrderPrintFormat(order string) string {
 	order = strings.ReplaceAll(order, "'", " ")
-	order = strings.ReplaceAll(order, "*", "**Pt Supply** ")
+
+	if strings.Contains(order, "*") {
+		starPos := 0
+		for i, r := range order {
+			if r == '*' {
+				starPos = i
+				break
+			}
+		}
+
+		runes := []rune(order)
+		lastRune := 0
+		for i := len(runes) - 1; i > 0; i-- {
+			if runes[i] != ' ' {
+				lastRune = i
+				break
+			}
+		}
+
+		totalBuffer := starPos + (len(runes) - lastRune)
+		newBuffer := totalBuffer - ptSupplyBuffer
+
+		frontBuffer := int(newBuffer / 2)
+		backBuffer := newBuffer - frontBuffer
+
+		newOrder := ""
+		for i := 0; i < frontBuffer; i++ {
+			newOrder += " "
+		}
+		newOrder += "**Pt Supply** "
+		newOrder += string(runes[starPos+1 : lastRune+1])
+		for i := 0; i < backBuffer; i++ {
+			newOrder += " "
+		}
+
+		order = newOrder
+	}
+
 	return order
 }
 
@@ -415,7 +454,7 @@ func (s Schedule) Print(c *config, filters []string) {
 	}
 
 	if hasPtSuppliedOrders {
-		orderColBuffer += 14
+		orderColBuffer += ptSupplyBuffer
 	}
 
 	rowSeperator := " "
