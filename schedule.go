@@ -439,21 +439,21 @@ func (s Schedule) Print(c *config, filters []string) {
 	nameColBuffer := s.LongestPatientName() + s.colSpaceBuffer
 	orderColBuffer := s.LongestOrderName() + s.colSpaceBuffer
 
-	hasPtSuppliedOrders := false
+	needsPtSuppliedBuffer := false
 	currentMRN := ""
 	for i, row := range s.table {
 		if row[1] != "" {
 			currentMRN = row[1]
 		}
 		if c.PtSupplyOrders.IsPatientSupplied(currentMRN, row[3]) {
-			if !hasPtSuppliedOrders {
-				hasPtSuppliedOrders = true
+			if s.LongestOrderName()-len(row[3]) < 14 {
+				needsPtSuppliedBuffer = true
 			}
 			s.table[i][3] = "*" + row[3]
 		}
 	}
 
-	if hasPtSuppliedOrders {
+	if needsPtSuppliedBuffer {
 		orderColBuffer += ptSupplyBuffer
 	}
 
