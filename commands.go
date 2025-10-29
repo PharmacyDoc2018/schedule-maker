@@ -85,8 +85,13 @@ func getCommands() commandMapList {
 		},
 		"change": {
 			name:        "change",
-			description: "change the value of an item. i.e. appointment time.",
+			description: "change the value of an i.em. i.e. appointment time",
 			callback:    commandChange,
+		},
+		"list": {
+			name:        "list",
+			description: "prints elements in a list",
+			callback:    commandList,
 		},
 	}
 	return commands
@@ -489,6 +494,31 @@ func commandRemove(c *config) error {
 
 	default:
 		return fmt.Errorf("error. remove command cannot be used from current node")
+	}
+
+	return nil
+}
+
+func commandList(c *config) error {
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
+	}
+
+	firstArg := c.lastInput[1]
+
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "ignoredOrders":
+			err := homeCommandListIgnoredOrders(c)
+			if err != nil {
+				return err
+			}
+		}
+
+	default:
+		return fmt.Errorf("error. list command cannot be used from current node")
+
 	}
 
 	return nil

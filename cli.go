@@ -132,6 +132,9 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
 		),
+		readline.PcItem("list",
+			readline.PcItem("ignoredOrders"),
+		),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
