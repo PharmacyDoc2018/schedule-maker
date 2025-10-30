@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/chzyer/readline"
 	"github.com/joho/godotenv"
@@ -44,6 +45,8 @@ func initREPL() *config {
 		allNodes:      nodeMap,
 		currentNodeID: 0,
 	}
+
+	config.lastSave = time.Now()
 
 	config.readlineCompleterMap = map[int]*readline.PrefixCompleter{}
 
@@ -370,4 +373,12 @@ func (c *config) FindPatientItemInInput(start int, itemType string) (mrn, ptName
 	item = strings.Join(c.lastInput[commandPatientLen:], " ")
 
 	return mrn, ptName, item, nil
+}
+
+func (c *config) AutoSave() {
+	const autosaveInterval = 5 * time.Minute
+	if time.Since(c.lastSave) >= autosaveInterval {
+		commandSave(c)
+	}
+
 }

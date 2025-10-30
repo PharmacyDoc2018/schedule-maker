@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/chzyer/readline"
 )
@@ -9,15 +10,16 @@ import (
 type config struct {
 	missingOrders        missingOrdersQueue
 	lastInput            []string
-	IgnoredOrders        IgnoredOrders
 	PrepullOrders        PrepullOrders
-	PtSupplyOrders       PtSupplyOrders
+	lastSave             time.Time
 	pathToSch            string
 	pathToSave           string
 	pathToIgnoredOrders  string
 	pathToPrepullOrders  string
 	pathToPtSupplyOrders string
 	location             Location
+	IgnoredOrders        IgnoredOrders
+	PtSupplyOrders       PtSupplyOrders
 	PatientList          map[string]Patient `json:"patient_list"`
 	patientNameMap       map[string]struct{}
 	commands             commandMapList

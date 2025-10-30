@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type cliCommand struct {
@@ -165,6 +166,7 @@ func commandSave(c *config) error {
 	c.savePrepullOrdersList()
 	c.savePtSupplyOrderList()
 	fmt.Println("save complete!")
+	c.lastSave = time.Now()
 
 	return nil
 }
@@ -558,6 +560,8 @@ func (c *config) CommandExe(input string) error {
 		if err != nil {
 			return err
 		}
+
+		c.AutoSave()
 
 	}
 	return nil
