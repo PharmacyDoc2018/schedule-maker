@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -147,57 +145,4 @@ func (c *config) FindMissingInfusionOrders() {
 		}
 	}
 	c.missingOrders.Sort(c, "time", "asc")
-}
-
-type PrepullOrders struct {
-	List []string `json:"prepull_orders_list"`
-}
-
-func (c *config) PullPrepullOrdersList() error {
-	_, err := os.Stat(c.pathToPrepullOrders)
-	if err == nil {
-		data, err := os.ReadFile(c.pathToPrepullOrders)
-		if err != nil {
-			return err
-		}
-
-		prepullOrders := PrepullOrders{}
-		err = json.Unmarshal(data, &prepullOrders)
-		if err != nil {
-			return err
-		}
-
-		c.PrepullOrders = prepullOrders
-
-	} else {
-		return fmt.Errorf("warning: prepull orders list not found")
-	}
-
-	return nil
-}
-
-func (c *config) savePrepullOrdersList() error {
-	data, err := json.Marshal(c.PrepullOrders)
-	if err != nil {
-		return err
-	}
-
-	saveFile, err := os.OpenFile(c.pathToPrepullOrders, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer func() error {
-		err = saveFile.Close()
-		if err != nil {
-			return err
-		}
-		return nil
-	}()
-
-	_, err = saveFile.Write(data)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
