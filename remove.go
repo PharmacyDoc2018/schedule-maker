@@ -53,6 +53,23 @@ func homeCommandRemoveIgnoredOrder(c *config) error {
 	return nil
 }
 
+func homeCommandRemovePrepullOrder(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing order argument")
+	}
+
+	order := strings.Join(c.lastInput[2:], " ")
+
+	err := c.PrepullOrders.Remove(order)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s removed from Prepull Orders List\n", order)
+	return nil
+
+}
+
 func homeCommandRemovePtSupplied(c *config) error {
 	if len(c.lastInput) < 4 {
 		return fmt.Errorf("error. too few arguments\nSyntax: remove ptSupplied [pt name] [order]")

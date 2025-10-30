@@ -39,6 +39,14 @@ func (p *PrepullOrders) Remove(order string) error {
 
 }
 
+func (p *PrepullOrders) Len() int {
+	return len(p.List)
+}
+
+func (p *PrepullOrders) ListOrders() []string {
+	return p.List
+}
+
 func (c *config) PullPrepullOrdersList() error {
 	_, err := os.Stat(c.pathToPrepullOrders)
 	if err == nil {

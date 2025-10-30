@@ -464,8 +464,15 @@ func commandRemove(c *config) error {
 			if err != nil {
 				return err
 			}
+
 		case "ptSupplied":
 			err := homeCommandRemovePtSupplied(c)
+			if err != nil {
+				return err
+			}
+
+		case "prepullOrder":
+			err := homeCommandRemovePrepullOrder(c)
 			if err != nil {
 				return err
 			}
