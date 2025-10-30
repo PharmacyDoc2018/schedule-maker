@@ -6,7 +6,7 @@ import (
 )
 
 func homeCommandListIgnoredOrders(c *config) error {
-	if len(c.IgnoredOrders.List) == 0 {
+	if c.IgnoredOrders.Len() == 0 {
 		return fmt.Errorf("error. No ignored orders")
 	}
 
@@ -14,7 +14,8 @@ func homeCommandListIgnoredOrders(c *config) error {
 	fmt.Println("Ignored Orders:")
 	fmt.Println()
 
-	ignoredOrders := c.IgnoredOrders.List
+	ignoredOrders := c.IgnoredOrders.Slices()
+
 	sort.Slice(ignoredOrders, func(i int, j int) bool {
 		return ignoredOrders[i] < ignoredOrders[j]
 	})

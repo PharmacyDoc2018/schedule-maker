@@ -30,6 +30,7 @@ func initREPL() *config {
 
 	config.PatientList = map[string]Patient{}
 	config.patientNameMap = map[string]struct{}{}
+	config.IgnoredOrders.Map = map[string]struct{}{}
 	config.PtSupplyOrders.Map = map[string]map[string]struct{}{}
 
 	nodeMap := make(map[int]*LocationNode)

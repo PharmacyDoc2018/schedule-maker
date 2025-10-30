@@ -371,11 +371,6 @@ func (s Schedule) OrderPrintFormat(order string) string {
 }
 
 func (s Schedule) Print(c *config, filters []string) {
-	ignoredSet := make(map[string]struct{}, len(c.IgnoredOrders.List))
-	for _, order := range c.IgnoredOrders.List {
-		ignoredSet[order] = struct{}{}
-	}
-
 	for _, filter := range filters {
 		switch filter {
 		case "defaultOrderFilter":
@@ -389,8 +384,7 @@ func (s Schedule) Print(c *config, filters []string) {
 					continue
 				}
 
-				key := strings.ReplaceAll(strings.ToLower(row[3]), " ", "")
-				if _, found := ignoredSet[key]; found {
+				if c.IgnoredOrders.Exists(row[3]) {
 					if row[0] != "" && i+1 < len(s.table) {
 						nextRow := s.table[i+1]
 						if nextRow[0] == "" {

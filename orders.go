@@ -149,59 +149,6 @@ func (c *config) FindMissingInfusionOrders() {
 	c.missingOrders.Sort(c, "time", "asc")
 }
 
-type IgnoredOrders struct {
-	List []string `json:"ignored_orders_list"`
-}
-
-func (c *config) PullIgnoredOrdersList() error {
-	_, err := os.Stat(c.pathToIgnoredOrders)
-	if err == nil {
-		data, err := os.ReadFile(c.pathToIgnoredOrders)
-		if err != nil {
-			return err
-		}
-
-		ignoredOrders := IgnoredOrders{}
-		err = json.Unmarshal(data, &ignoredOrders)
-		if err != nil {
-			return err
-		}
-
-		c.IgnoredOrders = ignoredOrders
-
-	} else {
-		return fmt.Errorf("warning: ignored orders list not found")
-	}
-
-	return nil
-}
-
-func (c *config) saveIgnoredOrdersList() error {
-	data, err := json.Marshal(c.IgnoredOrders)
-	if err != nil {
-		return err
-	}
-
-	saveFile, err := os.OpenFile(c.pathToIgnoredOrders, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer func() error {
-		err = saveFile.Close()
-		if err != nil {
-			return err
-		}
-		return nil
-	}()
-
-	_, err = saveFile.Write(data)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 type PrepullOrders struct {
 	List []string `json:"prepull_orders_list"`
 }

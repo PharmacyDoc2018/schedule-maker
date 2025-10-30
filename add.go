@@ -11,15 +11,11 @@ func homeCommandAddIgnoredOrder(c *config) error {
 	}
 
 	order := strings.Join(c.lastInput[2:], " ")
-	storedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
-
-	for _, item := range c.IgnoredOrders.List {
-		if storedOrder == item {
-			return fmt.Errorf("entry already exists on the Ignored Orders list")
-		}
+	err := c.IgnoredOrders.Add(order)
+	if err != nil {
+		return err
 	}
 
-	c.IgnoredOrders.List = append(c.IgnoredOrders.List, storedOrder)
 	fmt.Printf("order added: %s will be ignored\n", order)
 
 	return nil

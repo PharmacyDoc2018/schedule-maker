@@ -43,23 +43,14 @@ func homeCommandRemoveIgnoredOrder(c *config) error {
 	}
 
 	order := strings.Join(c.lastInput[2:], " ")
-	storedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
 
-	oldList := c.IgnoredOrders.List
-	newList := []string{}
-	for i, item := range oldList {
-		if storedOrder != item {
-			newList = append(newList, item)
-		} else {
-			newList = append(newList, oldList[i+1:]...)
-			c.IgnoredOrders.List = newList
-			oldList = nil
-			fmt.Printf("%s removed from Ignored Orders List\n", order)
-			return nil
-		}
+	err := c.IgnoredOrders.Remove(order)
+	if err != nil {
+		return err
 	}
-	return fmt.Errorf("error. order: %s not found in Ignored Orders List", order)
 
+	fmt.Printf("%s removed from Ignored Orders List\n", order)
+	return nil
 }
 
 func homeCommandRemovePtSupplied(c *config) error {
