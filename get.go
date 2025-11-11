@@ -150,11 +150,15 @@ func homeCommandGetPrepullOrders(c *config) error {
 			trimmedOrder := strings.ReplaceAll(strings.ToLower(order), " ", "")
 			for _, prepullOrder := range c.PrepullOrders.List {
 				if strings.Contains(trimmedOrder, prepullOrder) {
+					printedOrder := order
+					if c.PtSupplyOrders.IsPatientSupplied(patient.Mrn, order) {
+						printedOrder += " ** Pt Supply **"
+					}
 					prePullList = append(prePullList, prePullLine{
 						time:      time,
 						visitType: visitType,
 						name:      name,
-						order:     order,
+						order:     printedOrder,
 					})
 				}
 			}
