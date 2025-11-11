@@ -523,6 +523,15 @@ func commandList(c *config) error {
 			if err != nil {
 				return err
 			}
+
+		case "prepullOrders":
+			err := homeCommandListPrepullOrders(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s not a listable item", firstArg)
 		}
 
 	default:

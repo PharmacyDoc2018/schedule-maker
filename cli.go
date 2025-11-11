@@ -139,6 +139,7 @@ func (c *config) readlineSetup() *readline.Instance {
 		),
 		readline.PcItem("list",
 			readline.PcItem("ignoredOrders"),
+			readline.PcItem("prepullOrders"),
 		),
 	)
 

@@ -26,3 +26,25 @@ func homeCommandListIgnoredOrders(c *config) error {
 
 	return nil
 }
+
+func homeCommandListPrepullOrders(c *config) error {
+	if c.PrepullOrders.Len() == 0 {
+		return fmt.Errorf("error. No prepull orders")
+	}
+
+	commandClear(c)
+	fmt.Println("Prepull Orders:")
+	fmt.Println()
+
+	prepullOrders := c.PrepullOrders.ListOrders()
+
+	sort.Slice(prepullOrders, func(i, j int) bool {
+		return prepullOrders[i] < prepullOrders[j]
+	})
+
+	for _, order := range prepullOrders {
+		fmt.Println(order)
+	}
+
+	return nil
+}
