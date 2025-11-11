@@ -146,3 +146,29 @@ func (c *config) FindMissingInfusionOrders() {
 	}
 	c.missingOrders.Sort(c, "time", "asc")
 }
+
+func (c *config) OrderPreprocessing(order string) string {
+	orderRunes := []rune(order)
+	firstChar := string(orderRunes[:1])
+	orderNoFirstChar := string(orderRunes[1:])
+
+	switch firstChar {
+	case ".":
+		switch orderNoFirstChar {
+		case "p":
+			return "Phlebotomy therapeutic"
+
+		case "u":
+			return "unhook"
+
+		case "f":
+			return "flush"
+
+		default:
+			return order
+		}
+
+	default:
+		return order
+	}
+}

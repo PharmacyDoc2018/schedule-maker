@@ -47,6 +47,7 @@ func homeCommandAddOrder(c *config) error {
 		return err
 	}
 
+	order = c.OrderPreprocessing(order) //-- swaps out dot phrases
 	c.AddOrderQuick(mrn, order)
 
 	fmt.Printf("order: %s added for %s\n", order, ptName)
@@ -56,6 +57,7 @@ func homeCommandAddOrder(c *config) error {
 
 func patientCommandAddOrder(c *config) error {
 	order := strings.Join(c.lastInput[2:], " ")
+	order = c.OrderPreprocessing(order) //-- swaps out dot phrases
 	mrn := c.location.allNodes[c.location.currentNodeID].name
 	c.AddOrderQuick(mrn, order)
 	fmt.Println("order added: ", order)
