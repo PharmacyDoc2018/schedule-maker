@@ -30,6 +30,7 @@ func missingOrdersREPL(c *config, input string) {
 		}
 
 	default:
+		input = c.OrderPreprocessing(input) //-- replaces dot phrases
 		c.AddOrderQuick(mrn, input)
 		fmt.Println("order added: ", input)
 		commandClear(c)
