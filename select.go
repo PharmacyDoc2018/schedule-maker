@@ -13,7 +13,7 @@ func commandSelectPatient(c *config) error {
 		pt = strings.Join(c.lastInput[2:], " ")
 	}
 
-	if _, ok := c.PatientList[pt]; ok {
+	if _, ok := c.PatientList.Map[pt]; ok {
 		err := c.location.SelectPatientNode(pt)
 		if err != nil {
 			return err
@@ -21,7 +21,7 @@ func commandSelectPatient(c *config) error {
 		return nil
 
 	} else {
-		for key, val := range c.PatientList {
+		for key, val := range c.PatientList.Map {
 			if pt == val.Name {
 				fmt.Println("Found patient with name. MRN is", key)
 				fmt.Println()

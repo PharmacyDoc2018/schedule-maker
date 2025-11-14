@@ -16,7 +16,7 @@ func homeCommandChangeApptTimeInf(c *config) error {
 		return err
 	}
 
-	timePos := len(strings.Split(c.PatientList[mrn].Name, " ")) + 2
+	timePos := len(strings.Split(c.PatientList.Map[mrn].Name, " ")) + 2
 	if len(c.lastInput) == timePos {
 		return fmt.Errorf("error. no time entered.\n Syntax: change apptTimeInf [name] [new time]")
 	}
@@ -27,7 +27,7 @@ func homeCommandChangeApptTimeInf(c *config) error {
 		return err
 	}
 
-	patient := c.PatientList[mrn]
+	patient := c.PatientList.Map[mrn]
 	for key, val := range patient.AppointmentTimes {
 		if strings.Contains(key, infusionAppointmentTag) {
 			oldApptTime := val
@@ -52,7 +52,7 @@ func homeCommandChangeApptTimeInf(c *config) error {
 				}
 			}
 
-			c.PatientList[mrn] = patient
+			c.PatientList.Map[mrn] = patient
 			fmt.Printf("infusion appointment for %s changed from %s to %s.\n", patient.Name, oldApptTime.Format(timeFormat), newApptTime.Format(timeFormat))
 			return nil
 		}
@@ -73,7 +73,7 @@ func patientCommandChangeApptTimeInf(c *config) error {
 	}
 
 	mrn := c.location.allNodes[c.location.currentNodeID].name
-	patient := c.PatientList[mrn]
+	patient := c.PatientList.Map[mrn]
 
 	for key, val := range patient.AppointmentTimes {
 		if strings.Contains(key, infusionAppointmentTag) {
@@ -99,7 +99,7 @@ func patientCommandChangeApptTimeInf(c *config) error {
 				}
 			}
 
-			c.PatientList[mrn] = patient
+			c.PatientList.Map[mrn] = patient
 			fmt.Printf("infusion appointment for %s changed from %s to %s.\n", patient.Name, oldApptTime.Format(timeFormat), newApptTime.Format(timeFormat))
 			return nil
 

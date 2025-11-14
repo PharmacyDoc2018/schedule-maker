@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -59,14 +57,14 @@ func (m *missingOrdersQueue) Clear() {
 	m.queue = nil
 }
 
-func (m *missingOrdersQueue) Sort(c *config, key, order string) error {
+func (m *missingOrdersQueue) Sort(p *PatientList, key, order string) error {
 	switch key {
 	case "time", "appointmentTime":
 		switch order {
 		case "asc", "ascending":
 			sort.Slice(m.queue, func(i, j int) bool {
 				aTime, _ := func() (time.Time, error) {
-					for appt, apptTime := range c.PatientList[m.queue[i]].AppointmentTimes {
+					for appt, apptTime := range p.Map[m.queue[i]].AppointmentTimes {
 						if strings.Contains(appt, infusionAppointmentTag) {
 							return apptTime, nil
 						}
@@ -75,7 +73,7 @@ func (m *missingOrdersQueue) Sort(c *config, key, order string) error {
 				}()
 
 				bTime, _ := func() (time.Time, error) {
-					for appt, apptTime := range c.PatientList[m.queue[j]].AppointmentTimes {
+					for appt, apptTime := range p.Map[m.queue[j]].AppointmentTimes {
 						if strings.Contains(appt, infusionAppointmentTag) {
 							return apptTime, nil
 						}
@@ -101,50 +99,6 @@ func (m *missingOrdersQueue) NextPatient() (string, error) {
 		return "", fmt.Errorf("no patients left in queue")
 	}
 	return m.queue[0], nil
-}
-
-func (c *config) AddOrder(mrn, orderNum, orderName string) {
-	c.PatientList[mrn].Orders[orderNum] = orderName
-}
-
-func (c *config) AddOrderQuick(mrn, orderName string) {
-	//for adding orders without an order number
-	randNum := rand.Intn(90000000) + 10000000
-	pseudoOrderNum := "U" + strconv.Itoa(randNum)
-
-	c.AddOrder(mrn, pseudoOrderNum, orderName)
-}
-
-func (c *config) RemoveOrder(mrn, orderName string) error {
-	for key, val := range c.PatientList[mrn].Orders {
-		if val == orderName {
-			delete(c.PatientList[mrn].Orders, key)
-			return nil
-		}
-	}
-	return fmt.Errorf("order %s not found for %s", orderName, c.PatientList[mrn].Name)
-}
-
-func (c *config) FindMissingOrders() {
-	for mrn := range c.PatientList {
-		if len(c.PatientList[mrn].Orders) == noOrders {
-			c.missingOrders.AddPatient(mrn)
-		}
-	}
-}
-
-func (c *config) FindMissingInfusionOrders() {
-	for mrn := range c.PatientList {
-		if len(c.PatientList[mrn].Orders) == noOrders {
-			for appt := range c.PatientList[mrn].AppointmentTimes {
-				if strings.Contains(appt, infusionAppointmentTag) {
-					c.missingOrders.AddPatient(mrn)
-					break
-				}
-			}
-		}
-	}
-	c.missingOrders.Sort(c, "time", "asc")
 }
 
 func (c *config) OrderPreprocessing(order string) string {

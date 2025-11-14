@@ -17,7 +17,7 @@ func homeCommandRemoveOrder(c *config) error {
 		return err
 	}
 
-	err = c.RemoveOrder(mrn, order)
+	err = c.PatientList.RemoveOrder(mrn, order)
 	if err != nil {
 		return err
 	}
@@ -96,12 +96,12 @@ func patientCommandRemoveOrder(c *config) error {
 
 	order := strings.Join(c.lastInput[2:], " ")
 	mrn := c.location.allNodes[c.location.currentNodeID].name
-	patient := c.PatientList[mrn]
+	patient := c.PatientList.Map[mrn]
 
 	for key, val := range patient.Orders {
 		if val == order {
 			delete(patient.Orders, key)
-			c.PatientList[mrn] = patient
+			c.PatientList.Map[mrn] = patient
 			return nil
 		}
 	}

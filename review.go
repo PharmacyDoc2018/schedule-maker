@@ -18,7 +18,7 @@ func missingOrdersREPL(c *config, input string) {
 	case "":
 		fmt.Println("loading next patient...")
 		c.missingOrders.PopPatient()
-		if len(c.PatientList[mrn].Orders) == 0 {
+		if len(c.PatientList.Map[mrn].Orders) == 0 {
 			c.missingOrders.AddPatient(mrn)
 		}
 
@@ -31,7 +31,7 @@ func missingOrdersREPL(c *config, input string) {
 
 	default:
 		input = c.OrderPreprocessing(input) //-- replaces dot phrases
-		c.AddOrderQuick(mrn, input)
+		c.PatientList.AddOrderQuick(mrn, input)
 		fmt.Println("order added: ", input)
 		commandClear(c)
 

@@ -20,7 +20,8 @@ type config struct {
 	location             Location
 	IgnoredOrders        IgnoredOrders
 	PtSupplyOrders       PtSupplyOrders
-	PatientList          map[string]Patient `json:"patient_list"`
+	PatientList          PatientList
+	PatientLists         PatientLists
 	patientNameMap       map[string]struct{}
 	commands             commandMapList
 	readlineConfig       *readline.Config
@@ -31,14 +32,14 @@ type config struct {
 func main() {
 	config := initREPL()
 
-	err := initScheduledPatients(config)
+	err := initPatientLists(config)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	config.createPatientNameMap()
 
-	config.FindMissingInfusionOrders()
+	config.missingOrders = config.PatientList.FindMissingInfusionOrders()
 
 	err = config.PullIgnoredOrdersList()
 	if err != nil {

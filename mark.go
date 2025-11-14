@@ -15,7 +15,7 @@ func homeCommandMarkDone(c *config) error {
 	ptName := strings.Join(c.lastInput[2:], " ")
 	var mrn string
 	var patient Patient
-	for key, pt := range c.PatientList {
+	for key, pt := range c.PatientList.Map {
 		if pt.Name == ptName {
 			mrn = key
 			patient = pt
@@ -26,12 +26,12 @@ func homeCommandMarkDone(c *config) error {
 		return fmt.Errorf("error. %s not found", ptName)
 	}
 
-	if c.PatientList[mrn].VisitComplete {
+	if c.PatientList.Map[mrn].VisitComplete {
 		return fmt.Errorf("day already completed for %s", ptName)
 	}
 
 	patient.VisitComplete = true
-	c.PatientList[mrn] = patient
+	c.PatientList.Map[mrn] = patient
 	fmt.Printf("day for %s has been completed\n", ptName)
 
 	return nil
@@ -68,7 +68,7 @@ func homeCommandMarkOrder(c *config) error {
 	}
 
 	updatedPatient, err := func(mrn, order string) (Patient, error) {
-		patient := c.PatientList[mrn]
+		patient := c.PatientList.Map[mrn]
 		for key, val := range patient.Orders {
 			if val == order {
 				patient.Orders[key] = "'" + order
@@ -81,7 +81,7 @@ func homeCommandMarkOrder(c *config) error {
 		return err
 	}
 
-	c.PatientList[mrn] = updatedPatient
+	c.PatientList.Map[mrn] = updatedPatient
 	return nil
 
 }
@@ -95,7 +95,7 @@ func patientCommandMarkOrder(c *config) error {
 	mrn := c.location.allNodes[c.location.currentNodeID].name
 
 	updatedPatient, err := func(mrn, order string) (Patient, error) {
-		patient := c.PatientList[mrn]
+		patient := c.PatientList.Map[mrn]
 		for key, val := range patient.Orders {
 			if val == order {
 				patient.Orders[key] = "'" + order
@@ -108,7 +108,7 @@ func patientCommandMarkOrder(c *config) error {
 		return err
 	}
 
-	c.PatientList[mrn] = updatedPatient
+	c.PatientList.Map[mrn] = updatedPatient
 
 	return nil
 }

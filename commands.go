@@ -161,7 +161,7 @@ func commandRestartNoSave(c *config) error {
 
 func commandSave(c *config) error {
 	fmt.Println("saving data...")
-	c.savePatientList()
+	c.savePatientLists()
 	c.saveIgnoredOrdersList()
 	c.savePrepullOrdersList()
 	c.savePtSupplyOrderList()

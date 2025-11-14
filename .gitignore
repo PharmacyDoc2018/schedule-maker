@@ -1,6 +1,8 @@
 schedule/
+schedule_backup/
 data/
 .env
 schedule-maker
 schedule-maker.exe
 build_for_windows.sh
+load_backup_schedule.sh

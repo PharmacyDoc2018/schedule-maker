@@ -29,7 +29,7 @@ func initREPL() *config {
 
 	config.commands = getCommands()
 
-	config.PatientList = map[string]Patient{}
+	config.PatientList.Map = map[string]Patient{}
 	config.patientNameMap = map[string]struct{}{}
 	config.IgnoredOrders.Map = map[string]struct{}{}
 	config.PtSupplyOrders.Map = map[string]map[string]struct{}{}
@@ -187,7 +187,7 @@ func (c *config) readlineSetup() *readline.Instance {
 
 func (c *config) getPatientArgs(input string) []string {
 	var patients []string
-	for _, val := range c.PatientList {
+	for _, val := range c.PatientList.Map {
 		patients = append(patients, val.Name)
 	}
 
@@ -210,7 +210,7 @@ func (c *config) getPatientOrders(input string) []string {
 	}
 
 	mrn := ""
-	for key, val := range c.PatientList {
+	for key, val := range c.PatientList.Map {
 		if val.Name == ptName {
 			mrn = key
 			break
@@ -220,7 +220,7 @@ func (c *config) getPatientOrders(input string) []string {
 		return orders
 	}
 
-	for _, order := range c.PatientList[mrn].Orders {
+	for _, order := range c.PatientList.Map[mrn].Orders {
 		orders = append(orders, order)
 	}
 
@@ -231,7 +231,7 @@ func (c *config) GetPatientOrdersFromLoc(input string) []string {
 	orders := []string{}
 
 	mrn := c.location.allNodes[c.location.currentNodeID].name
-	for _, order := range c.PatientList[mrn].Orders {
+	for _, order := range c.PatientList.Map[mrn].Orders {
 		orders = append(orders, order)
 	}
 
@@ -269,9 +269,9 @@ func (c *config) readlineLoopStartPreprocess() {
 				return
 			}
 
-			pt := c.PatientList[mrn].Name
+			pt := c.PatientList.Map[mrn].Name
 			apptTime := func() string {
-				for appt, apptTime := range c.PatientList[mrn].AppointmentTimes {
+				for appt, apptTime := range c.PatientList.Map[mrn].AppointmentTimes {
 					if strings.Contains(appt, infusionAppointmentTag) {
 						return apptTime.Format(timeFormat)
 					}
@@ -280,9 +280,9 @@ func (c *config) readlineLoopStartPreprocess() {
 			}()
 
 			fmt.Printf("Current Patient: %s - %s (%s). Adding orders:\n", apptTime, pt, mrn)
-			if len(c.PatientList[mrn].Orders) > 0 {
+			if len(c.PatientList.Map[mrn].Orders) > 0 {
 				fmt.Println("Current Orders:")
-				for _, order := range c.PatientList[mrn].Orders {
+				for _, order := range c.PatientList.Map[mrn].Orders {
 					fmt.Println(order)
 				}
 				fmt.Println()
@@ -291,8 +291,8 @@ func (c *config) readlineLoopStartPreprocess() {
 
 	case Home:
 		var infusionPatientNum int
-		for mrn := range c.PatientList {
-			for appt := range c.PatientList[mrn].AppointmentTimes {
+		for mrn := range c.PatientList.Map {
+			for appt := range c.PatientList.Map[mrn].AppointmentTimes {
 				if strings.Contains(appt, infusionAppointmentTag) {
 					infusionPatientNum++
 					break
@@ -304,33 +304,33 @@ func (c *config) readlineLoopStartPreprocess() {
 	case PatientLoc:
 		commandClear(c)
 		mrn := c.location.allNodes[c.location.currentNodeID].name
-		pt := c.PatientList[mrn]
+		pt := c.PatientList.Map[mrn]
 		fmt.Printf("Selected Patient: %s (%s)\n\n", pt.Name, pt.Mrn)
 
-		if len(c.PatientList[mrn].AppointmentTimes) == 0 {
+		if len(c.PatientList.Map[mrn].AppointmentTimes) == 0 {
 			fmt.Println("Appointments: None")
 		} else {
 			fmt.Println("Appointments:")
 			apptSlices := []string{}
-			for key := range c.PatientList[mrn].AppointmentTimes {
+			for key := range c.PatientList.Map[mrn].AppointmentTimes {
 				apptSlices = append(apptSlices, key)
 			}
 
 			sort.Slice(apptSlices, func(i, j int) bool {
-				return c.PatientList[mrn].AppointmentTimes[apptSlices[i]].Before(c.PatientList[mrn].AppointmentTimes[apptSlices[j]])
+				return c.PatientList.Map[mrn].AppointmentTimes[apptSlices[i]].Before(c.PatientList.Map[mrn].AppointmentTimes[apptSlices[j]])
 			})
 
 			for _, appt := range apptSlices {
-				fmt.Printf("  %s: %s\n", appt, c.PatientList[mrn].AppointmentTimes[appt].Format(timeFormat))
+				fmt.Printf("  %s: %s\n", appt, c.PatientList.Map[mrn].AppointmentTimes[appt].Format(timeFormat))
 			}
 			fmt.Println()
 		}
 
-		if len(c.PatientList[mrn].Orders) == 0 {
+		if len(c.PatientList.Map[mrn].Orders) == 0 {
 			fmt.Println("Current Orders: None")
 		} else {
 			fmt.Println("Current Orders:")
-			for _, order := range c.PatientList[mrn].Orders {
+			for _, order := range c.PatientList.Map[mrn].Orders {
 				if c.PtSupplyOrders.IsPatientSupplied(mrn, order) {
 					fmt.Println(" ", "[Pt Supplied]", order, "[Pt Supplied]")
 				} else {
@@ -347,7 +347,7 @@ func (c *config) FindPatientInInput(start int) (mrn string, err error) {
 	for i < len(c.patientNameMap) {
 		if _, ok := c.patientNameMap[strings.Join(c.lastInput[start:i], " ")]; ok {
 			ptName := strings.Join(c.lastInput[2:i], " ")
-			for key, val := range c.PatientList {
+			for key, val := range c.PatientList.Map {
 				if val.Name == ptName {
 					return key, nil
 				}
@@ -365,7 +365,7 @@ func (c *config) FindPatientItemInInput(start int, itemType string) (mrn, ptName
 		return "", "", "", err
 	}
 
-	ptName = c.PatientList[mrn].Name
+	ptName = c.PatientList.Map[mrn].Name
 	commandPatientLen := len(strings.Split(ptName, " ")) + start
 	if len(c.lastInput) == commandPatientLen {
 		return "", "", "", fmt.Errorf("error. missing %s argument", itemType)

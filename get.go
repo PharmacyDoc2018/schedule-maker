@@ -20,7 +20,7 @@ func homeCommandGetScheduleInf(c *config) {
 	}
 
 	infApptSlices := []infAppt{}
-	for _, patient := range c.PatientList {
+	for _, patient := range c.PatientList.Map {
 		for appt, apptTime := range patient.AppointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) {
 				ordersSlice := []string{}
@@ -116,7 +116,7 @@ func homeCommandGetNextMissingOrderPatient(c *config) error {
 		return err
 	}
 
-	pt := c.PatientList[mrn].Name
+	pt := c.PatientList.Map[mrn].Name
 	fmt.Printf("next patient with missing orders: %s (%s)\n", pt, mrn)
 
 	return nil
@@ -132,7 +132,7 @@ func homeCommandGetPrepullOrders(c *config) error {
 
 	prePullList := []prePullLine{}
 
-	for _, patient := range c.PatientList {
+	for _, patient := range c.PatientList.Map {
 		visitType := ""
 		time := ""
 		name := patient.Name
