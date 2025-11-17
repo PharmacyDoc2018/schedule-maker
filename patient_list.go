@@ -147,42 +147,28 @@ func (p *PatientLists) Update(patientList PatientList) error {
 func initPatientLists(c *config) error {
 	_, err := os.Stat(c.pathToSave)
 	fmt.Println("looking for saved data...")
-	if err != nil {
+	if err != nil { //-- if no save data -> check for excel files
 		fmt.Println("no save data found. looking for excel file...")
-		scheduleRows, ordersRows, err := pullDataFromExcel(c)
+		patientLists, err := pullDataFromExcel(c)
 		if err != nil {
-			return err //-- no save data, no excel files breakpoint
+			return err
 		}
 
-		fmt.Println("creating patient list...")
-		patientList, err := createPatientList(scheduleRows, ordersRows)
-		if err != nil {
-			return err //-- no dave data, error with excel files breakpoint
-		}
+		c.PatientLists = patientLists
 
-		randApptTime := time.Time{}
-		for _, pt := range patientList.Map {
-			for _, apptTime := range pt.AppointmentTimes {
-				randApptTime = apptTime
+		for i, ptList := range c.PatientLists.Slices {
+			if ptList.Date.Year() == time.Now().Year() &&
+				ptList.Date.Month() == time.Now().Month() &&
+				ptList.Date.Day() == time.Now().Day() {
+				c.PatientList = c.PatientLists.Slices[i]
 				break
 			}
-			break
 		}
-		dateOnly := time.Date(
-			randApptTime.Year(),
-			randApptTime.Month(),
-			randApptTime.Day(),
-			0,
-			0,
-			0,
-			0,
-			randApptTime.Location(),
-		)
 
-		patientList.Date = dateOnly
-		c.PatientList = patientList
-		c.PatientLists = PatientLists{}
-		c.PatientLists.Add(patientList)
+		if c.PatientList == PatientList{} {
+			lastPatientList, _ := c.PatientLists.Last()
+			c.PatientList = lastPatientList
+		}
 
 	} else { //-- if save data is found
 		fmt.Println("saved data found! Loading patient lists...")
@@ -202,6 +188,16 @@ func initPatientLists(c *config) error {
 
 		c.PatientLists = patientLists //-- set unmarshalled patient lists into config
 
+		fmt.Println("checking for excel data...")
+		excelPatientLists, err := pullDataFromExcel(c)
+		if err != nil {
+			fmt.Println("unable to find excel data:\n%s", err.Error())
+		} else {
+			for _, item := range excelPatientLists.Slices {
+				c.PatientLists.Add(item)
+			}
+		}
+
 		todayPtList, err := func(ptLists PatientLists) (PatientList, error) {
 			for _, list := range ptLists.Slices {
 				if list.Date.Year() == time.Now().Year() &&
@@ -213,57 +209,15 @@ func initPatientLists(c *config) error {
 			return PatientList{}, fmt.Errorf("no lists for today found")
 		}(c.PatientLists)
 
-		if err != nil { //-- no patient list for today, check excel folder
+		if err != nil { //-- if no patients for today found -> load last
 			fmt.Println(err.Error())
-			fmt.Println("checking for excel files...")
-
-			scheduleRows, ordersRows, err := pullDataFromExcel(c)
-			if err != nil { //-- no patient list for today, no excel files
-				fmt.Println(err.Error())
-				fmt.Print("loading most recent patient list...")
-				c.PatientList, err = c.PatientLists.Last()
-				if err != nil {
-					return err
-				}
-			}
-
-			fmt.Println("creating patient list...")
-			patientList, err := createPatientList(scheduleRows, ordersRows)
-			if err != nil { //-- no patient list for today, error with excel files
-				fmt.Println(err.Error())
-				fmt.Print("loading most recent patient list...")
-				c.PatientList, err = c.PatientLists.Last()
-				if err != nil {
-					return err
-				}
-			}
-
-			randApptTime := time.Time{}
-			for _, pt := range patientList.Map {
-				for _, apptTime := range pt.AppointmentTimes {
-					randApptTime = apptTime
-					break
-				}
-				break
-			}
-			dateOnly := time.Date(
-				randApptTime.Year(),
-				randApptTime.Month(),
-				randApptTime.Day(),
-				0,
-				0,
-				0,
-				0,
-				randApptTime.Location(),
-			)
-
-			patientList.Date = dateOnly
-			c.PatientList = patientList
-			c.PatientLists.Add(patientList)
-
-		} else { //-- set list with today's date as active patient list
+			fmt.Print("loading most recent patient list...")
+			lastPatientList, _ := c.PatientLists.Last()
+			c.PatientList = lastPatientList
+		} else {
 			c.PatientList = todayPtList
 		}
+
 	}
 	return nil
 }

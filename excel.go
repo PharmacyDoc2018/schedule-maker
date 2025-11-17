@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
+	"path"
 	"strings"
 	"time"
 
@@ -24,23 +24,19 @@ type ExcelMatchList struct {
 func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 	sheetList := file.GetSheetList()
 
-	docProps, err := file.GetDocProps()
+	fileStats, err := os.Stat(file.Path)
 	if err != nil {
-		return fmt.Errorf("error. cannot access doc properties for %s", file.Path)
+		return fmt.Errorf("error. cannot access doc stats for %s", file.Path)
 	}
 
+	fileName := fileStats.Name()
+
 	if len(sheetList) > 1 {
-		if err != nil {
-			return fmt.Errorf("%s\nerror. workbook has too many sheets", err.Error())
-		}
-		return fmt.Errorf("error. %s has many too many sheets", docProps.Title)
+		return fmt.Errorf("error. %s has many too many sheets", fileName)
 	}
 
 	if len(sheetList) == 0 {
-		if err != nil {
-			return fmt.Errorf("%s\nerror. workbook has no sheets. how did you manage that?", err.Error())
-		}
-		return fmt.Errorf("error. %s has no sheets. how did you manage that?", docProps.Title)
+		return fmt.Errorf("error. %s has no sheets. how did you manage that?", fileName)
 	}
 
 	sheet := sheetList[0]
@@ -49,9 +45,135 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 		return err
 	}
 
-	isScheduleXLSX, err := func([][]string) (bool, error) {
-		//
+	isScheduleXLSX := func([][]string) bool {
+		if rows[0][0] == "MRN" && rows[0][1] == "Patient" {
+			return true
+		}
+		return false
 	}(rows)
+
+	isOrdersXLSX := func([][]string) bool {
+		if rows[0][0] == "Patient" && rows[0][1] == "Age" {
+			return true
+		}
+		return false
+	}(rows)
+
+	if isScheduleXLSX && isOrdersXLSX {
+		return fmt.Errorf("error determining report type: %s", file.Path)
+	}
+
+	if !isScheduleXLSX && !isOrdersXLSX {
+		return fmt.Errorf("error. unknown report type: %s", file.Path)
+	}
+
+	if isScheduleXLSX {
+		visitDate, err := time.Parse("01/02/2006", rows[1][3])
+		if err != nil {
+			return err
+		}
+
+		scheduleDate := time.Date(
+			visitDate.Year(),
+			visitDate.Month(),
+			visitDate.Day(),
+			0,
+			0,
+			0,
+			0,
+			visitDate.Location(),
+		)
+
+		for i, entry := range e.Slices {
+			if entry.Date.Year() == scheduleDate.Year() &&
+				entry.Date.Month() == scheduleDate.Month() &&
+				entry.Date.Day() == scheduleDate.Day() {
+				if entry.Schedule == nil {
+					e.Slices[i].Schedule = file
+					e.Slices[i].Complete = true
+					return nil
+				}
+
+				currentFileInfo, currentFileErr := os.Stat(file.Path)
+				savedFileInfo, savedFilesErr := os.Stat(entry.Schedule.Path)
+				if currentFileErr != nil || savedFilesErr != nil {
+					return fmt.Errorf("error. schedule for that day already exists: cannot determine more recent file")
+				}
+
+				if savedFileInfo.ModTime().After(currentFileInfo.ModTime()) {
+					return fmt.Errorf("error. current saved schedule from %s is more recent than schedule from %s", savedFileInfo.Name(), currentFileInfo.Name())
+
+				} else {
+					e.Slices[i].Schedule = file
+					return nil
+				}
+
+			}
+		}
+
+		e.Slices = append(e.Slices, ExcelMatch{
+			Date:     scheduleDate,
+			Schedule: file,
+			Complete: false,
+		})
+
+		return nil
+	}
+
+	if isOrdersXLSX {
+		visitDate, err := time.Parse("01/02/2006", rows[1][10])
+		if err != nil {
+			return err
+		}
+
+		scheduleDate := time.Date(
+			visitDate.Year(),
+			visitDate.Month(),
+			visitDate.Day(),
+			0,
+			0,
+			0,
+			0,
+			visitDate.Location(),
+		)
+
+		for i, entry := range e.Slices {
+			if entry.Date.Year() == scheduleDate.Year() &&
+				entry.Date.Month() == scheduleDate.Month() &&
+				entry.Date.Day() == scheduleDate.Day() {
+				if entry.Orders == nil {
+					e.Slices[i].Orders = file
+					e.Slices[i].Complete = true
+					return nil
+				}
+
+				currentFileInfo, currentFileErr := os.Stat(file.Path)
+				savedFileInfo, savedFilesErr := os.Stat(entry.Schedule.Path)
+				if currentFileErr != nil || savedFilesErr != nil {
+					return fmt.Errorf("error. orders for that day already exists: cannot determine more recent file")
+				}
+
+				if savedFileInfo.ModTime().After(currentFileInfo.ModTime()) {
+					return fmt.Errorf("error. current saved orders from %s is more recent than orders from %s", savedFileInfo.Name(), currentFileInfo.Name())
+
+				} else {
+					e.Slices[i].Orders = file
+					return nil
+				}
+
+			}
+		}
+
+		e.Slices = append(e.Slices, ExcelMatch{
+			Date:     scheduleDate,
+			Schedule: file,
+			Complete: false,
+		})
+
+		return nil
+	}
+
+	return fmt.Errorf("error. add entry failed: unknown error")
 
 }
 
@@ -66,92 +188,74 @@ func (e *ExcelMatchList) AddEntries(files []*excelize.File) []error {
 	return errors
 }
 
-func pullDataFromExcel(c *config) (scheduleRows, ordersRows [][]string, err error) {
+func pullDataFromExcel(c *config) (PatientLists, error) {
 	entries, err := os.ReadDir(c.pathToSch)
 	if err != nil {
-		return [][]string{}, [][]string{}, err
+		return PatientLists{}, err
 	}
 
 	if len(entries) == 0 {
-		return [][]string{}, [][]string{}, fmt.Errorf("no excel files found")
-	}
-
-	if len(entries) > 2 {
-		return [][]string{}, [][]string{}, fmt.Errorf("too many files found in excel folder")
-	}
-
-	var schedulePath string
-	var ordersPath string
-	for _, entry := range entries {
-		if strings.Contains(entry.Name(), "Schedule__Augusta") {
-			schedulePath = filepath.Join(c.pathToSch, entry.Name())
-		}
-		if strings.Contains(entry.Name(), "Scheduled_Orders__Augusta") {
-			ordersPath = filepath.Join(c.pathToSch, entry.Name())
-		}
-	}
-
-	if schedulePath == "" {
-		return [][]string{}, [][]string{}, fmt.Errorf("no schedule excel file found")
-	}
-
-	if ordersPath == "" {
-		return [][]string{}, [][]string{}, fmt.Errorf("no orders excel file found")
+		return PatientLists{}, fmt.Errorf("no excel files found")
 	}
 
 	fmt.Println("excel files found! pulling data...")
 
-	scheduleXLSX, err := excelize.OpenFile(schedulePath)
-	if err != nil {
-		return [][]string{}, [][]string{}, err
-	}
-	defer func() {
-		err := scheduleXLSX.Close()
+	files := []*excelize.File{}
+	for _, entry := range entries {
+		file, err := excelize.OpenFile(path.Join(c.pathToSch, entry.Name()))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("unable to open %s", entry.Name())
+			continue
 		}
-	}()
-
-	scheduleSheetList := scheduleXLSX.GetSheetList()
-	if len(scheduleSheetList) > 1 {
-		return [][]string{}, [][]string{}, fmt.Errorf("too many sheets in schedule workbook")
-	}
-	if len(scheduleSheetList) == 0 {
-		return [][]string{}, [][]string{}, fmt.Errorf("no sheets in schedule workbook. how did you manage that?")
+		files = append(files, file)
 	}
 
-	scheduleSheet := scheduleSheetList[0]
-	scheduleRows, err = scheduleXLSX.GetRows(scheduleSheet)
-	if err != nil {
-		return [][]string{}, [][]string{}, err
+	excelMatchList := ExcelMatchList{}
+	errs := excelMatchList.AddEntries(files)
+	for _, err := range errs {
+		fmt.Println(err.Error())
 	}
 
-	ordersXLSX, err := excelize.OpenFile(ordersPath)
-	if err != nil {
-		return [][]string{}, [][]string{}, err
-	}
-	defer func() {
-		err := ordersXLSX.Close()
+	fmt.Println("creating patient lists...")
+	patientLists := PatientLists{}
+
+	for _, item := range excelMatchList.Slices {
+		if !item.Complete {
+			continue
+		}
+
+		scheduleRows, err := item.Schedule.GetRows(item.Schedule.GetSheetList()[0])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error())
+			continue
 		}
-	}()
 
-	ordersSheetList := ordersXLSX.GetSheetList()
-	if len(ordersSheetList) > 1 {
-		return [][]string{}, [][]string{}, fmt.Errorf("too many sheets in orders workbook")
-	}
-	if len(ordersSheetList) == 0 {
-		return [][]string{}, [][]string{}, fmt.Errorf("no sheets in orders workbook. how did you manage that?")
+		ordersRows, err := item.Orders.GetRows(item.Orders.GetSheetList()[0])
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+
+		ptList, err := createPatientList(scheduleRows, ordersRows)
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+
+		ptList.Date = item.Date
+
+		patientLists.Add(ptList)
 	}
 
-	ordersSheet := ordersSheetList[0]
-	ordersRows, err = ordersXLSX.GetRows(ordersSheet)
-	if err != nil {
-		return [][]string{}, [][]string{}, err
+	for _, file := range files {
+		err := file.Close()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 
-	return scheduleRows, ordersRows, nil
+	return patientLists, nil
+
 }
 
 func parseDateTime(apptDateString, apptTimeString string) (time.Time, error) {
