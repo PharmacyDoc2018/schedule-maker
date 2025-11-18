@@ -22,6 +22,7 @@ type ExcelMatchList struct {
 }
 
 func (e *ExcelMatchList) addEntry(file *excelize.File) error {
+
 	sheetList := file.GetSheetList()
 
 	fileStats, err := os.Stat(file.Path)
@@ -68,7 +69,7 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 	}
 
 	if isScheduleXLSX {
-		visitDate, err := time.Parse("01/02/2006", rows[1][3])
+		visitDate, err := parseDate(rows[1][2])
 		if err != nil {
 			return err
 		}
@@ -85,9 +86,7 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 		)
 
 		for i, entry := range e.Slices {
-			if entry.Date.Year() == scheduleDate.Year() &&
-				entry.Date.Month() == scheduleDate.Month() &&
-				entry.Date.Day() == scheduleDate.Day() {
+			if isSameDay(entry.Date, scheduleDate) {
 				if entry.Schedule == nil {
 					e.Slices[i].Schedule = file
 					e.Slices[i].Complete = true
@@ -107,7 +106,6 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 					e.Slices[i].Schedule = file
 					return nil
 				}
-
 			}
 		}
 
@@ -121,7 +119,7 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 	}
 
 	if isOrdersXLSX {
-		visitDate, err := time.Parse("01/02/2006", rows[1][10])
+		visitDate, err := parseDate(rows[1][9])
 		if err != nil {
 			return err
 		}
@@ -138,9 +136,7 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 		)
 
 		for i, entry := range e.Slices {
-			if entry.Date.Year() == scheduleDate.Year() &&
-				entry.Date.Month() == scheduleDate.Month() &&
-				entry.Date.Day() == scheduleDate.Day() {
+			if isSameDay(entry.Date, scheduleDate) {
 				if entry.Orders == nil {
 					e.Slices[i].Orders = file
 					e.Slices[i].Complete = true
@@ -204,7 +200,7 @@ func pullDataFromExcel(c *config) (PatientLists, error) {
 	for _, entry := range entries {
 		file, err := excelize.OpenFile(path.Join(c.pathToSch, entry.Name()))
 		if err != nil {
-			fmt.Println("unable to open %s", entry.Name())
+			fmt.Printf("unable to open %s\n", entry.Name())
 			continue
 		}
 		files = append(files, file)
@@ -284,6 +280,44 @@ func parseDateTime(apptDateString, apptTimeString string) (time.Time, error) {
 	)
 
 	return apptDateTime, nil
+}
+
+func parseDate(dateString string) (time.Time, error) {
+	dateFormats := []string{
+		"01/02/2006",
+		"1/2/2006",
+		"01/02/06",
+		"1/2/06",
+		"01-02-2006",
+		"1-2-2006",
+		"01-02-06",
+		"1-2-06",
+		"01/02/2006 15:04",
+		"1/2/2006 15:04",
+		"01/02/06 15:04",
+		"1/2/06 15:04",
+		"01-02-2006 15:04",
+		"1-2-2006 15:04",
+		"01-02-06 15:04",
+		"1-2-06 15:04",
+	}
+
+	for _, dtFormat := range dateFormats {
+		date, err := time.Parse(dtFormat, dateString)
+		if err != nil {
+			continue
+		}
+		return date, nil
+	}
+
+	return time.Time{}, fmt.Errorf("error. cannot parse %s as a date", dateString)
+
+}
+
+func isSameDay(dateOne, dateTwo time.Time) bool {
+	return dateOne.Year() == dateTwo.Year() &&
+		dateOne.Month() == dateTwo.Month() &&
+		dateOne.Day() == dateTwo.Day()
 }
 
 func createPatientList(scheduleRows, ordersRows [][]string) (PatientList, error) {

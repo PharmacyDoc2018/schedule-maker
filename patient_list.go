@@ -111,9 +111,7 @@ type PatientLists struct {
 
 func (p *PatientLists) Add(patientList PatientList) error {
 	for _, list := range p.Slices {
-		if patientList.Date.Year() == list.Date.Year() &&
-			patientList.Date.Month() == list.Date.Month() &&
-			patientList.Date.Day() == list.Date.Day() {
+		if isSameDay(patientList.Date, list.Date) {
 			return fmt.Errorf("error. patient list already exists for this day")
 		}
 	}
@@ -131,9 +129,7 @@ func (p *PatientLists) Last() (PatientList, error) {
 
 func (p *PatientLists) Update(patientList PatientList) error {
 	for i, list := range p.Slices {
-		if patientList.Date.Year() == list.Date.Year() &&
-			patientList.Date.Month() == list.Date.Month() &&
-			patientList.Date.Day() == list.Date.Day() {
+		if isSameDay(patientList.Date, list.Date) {
 			p.Slices = append(p.Slices[:i], p.Slices[i+1:]...)
 			p.Slices = append(p.Slices, patientList)
 			return nil
@@ -156,16 +152,17 @@ func initPatientLists(c *config) error {
 
 		c.PatientLists = patientLists
 
-		for i, ptList := range c.PatientLists.Slices {
-			if ptList.Date.Year() == time.Now().Year() &&
-				ptList.Date.Month() == time.Now().Month() &&
-				ptList.Date.Day() == time.Now().Day() {
-				c.PatientList = c.PatientLists.Slices[i]
-				break
+		isSet := func(c *config) bool {
+			for i, ptList := range c.PatientLists.Slices {
+				if isSameDay(ptList.Date, time.Now()) {
+					c.PatientList = c.PatientLists.Slices[i]
+					return true
+				}
 			}
-		}
+			return false
+		}(c)
 
-		if c.PatientList == PatientList{} {
+		if !isSet {
 			lastPatientList, _ := c.PatientLists.Last()
 			c.PatientList = lastPatientList
 		}
@@ -191,10 +188,24 @@ func initPatientLists(c *config) error {
 		fmt.Println("checking for excel data...")
 		excelPatientLists, err := pullDataFromExcel(c)
 		if err != nil {
-			fmt.Println("unable to find excel data:\n%s", err.Error())
+			fmt.Printf("unable to find excel data:\n%s\n", err.Error())
 		} else {
 			for _, item := range excelPatientLists.Slices {
-				c.PatientLists.Add(item)
+				isMissingList := func(c *config, item PatientList) bool { //-- only adds patient list from excel files if patient list for that day doesn't already exist
+					for _, list := range c.PatientLists.Slices {
+						if isSameDay(list.Date, item.Date) {
+							return false
+						}
+					}
+					return true
+				}(c, item)
+
+				if isMissingList {
+					err := c.PatientLists.Add(item)
+					if err != nil {
+						fmt.Println(err.Error())
+					}
+				}
 			}
 		}
 
@@ -219,6 +230,7 @@ func initPatientLists(c *config) error {
 		}
 
 	}
+	fmt.Println()
 	return nil
 }
 
