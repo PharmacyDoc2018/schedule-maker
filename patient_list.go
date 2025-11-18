@@ -23,11 +23,6 @@ type PatientList struct {
 	Date time.Time          `json:"date"`
 }
 
-func getPatientListFileNameFromDate(date time.Time) string {
-	return strconv.Itoa(date.Year()) + strconv.Itoa(int(date.Month())) + strconv.Itoa(date.Day()) + ".json"
-
-}
-
 func (p *PatientList) addPatient(mrn, name string) error {
 	if _, ok := p.Map[mrn]; ok {
 		return fmt.Errorf("patient already exists")
@@ -211,9 +206,7 @@ func initPatientLists(c *config) error {
 
 		todayPtList, err := func(ptLists PatientLists) (PatientList, error) {
 			for _, list := range ptLists.Slices {
-				if list.Date.Year() == time.Now().Year() &&
-					list.Date.Month() == time.Now().Month() &&
-					list.Date.Day() == time.Now().Day() {
+				if isSameDay(list.Date, time.Now()) {
 					return list, nil
 				}
 			}

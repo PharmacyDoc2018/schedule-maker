@@ -69,21 +69,10 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 	}
 
 	if isScheduleXLSX {
-		visitDate, err := parseDate(rows[1][2])
+		scheduleDate, err := parseDate(rows[1][2])
 		if err != nil {
 			return err
 		}
-
-		scheduleDate := time.Date(
-			visitDate.Year(),
-			visitDate.Month(),
-			visitDate.Day(),
-			0,
-			0,
-			0,
-			0,
-			visitDate.Location(),
-		)
 
 		for i, entry := range e.Slices {
 			if isSameDay(entry.Date, scheduleDate) {
@@ -119,21 +108,10 @@ func (e *ExcelMatchList) addEntry(file *excelize.File) error {
 	}
 
 	if isOrdersXLSX {
-		visitDate, err := parseDate(rows[1][9])
+		scheduleDate, err := parseDate(rows[1][9])
 		if err != nil {
 			return err
 		}
-
-		scheduleDate := time.Date(
-			visitDate.Year(),
-			visitDate.Month(),
-			visitDate.Day(),
-			0,
-			0,
-			0,
-			0,
-			visitDate.Location(),
-		)
 
 		for i, entry := range e.Slices {
 			if isSameDay(entry.Date, scheduleDate) {
