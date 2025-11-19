@@ -48,3 +48,15 @@ func homeCommandListPrepullOrders(c *config) error {
 
 	return nil
 }
+
+func homeCommandListPatientLists(c *config) error {
+	dates, err := c.PatientLists.GetDates()
+	if err != nil {
+		return err
+	}
+
+	for _, date := range dates {
+		fmt.Println(date)
+	}
+	return nil
+}

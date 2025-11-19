@@ -530,6 +530,12 @@ func commandList(c *config) error {
 				return err
 			}
 
+		case "patientLists":
+			err := homeCommandListPatientLists(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s not a listable item", firstArg)
 		}

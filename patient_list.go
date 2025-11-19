@@ -135,6 +135,29 @@ func (p *PatientLists) Update(patientList PatientList) error {
 
 }
 
+func (p *PatientLists) RemoveList(patientList PatientList) error {
+	for i, ptList := range p.Slices {
+		if isSameDay(patientList.Date, ptList.Date) {
+			p.Slices = append(p.Slices[:i], p.Slices[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("error. patient list for %s not found", patientList.Date.Format(dateFormat))
+}
+
+func (p *PatientLists) GetDates() ([]string, error) {
+	if len(p.Slices) == 0 {
+		return []string{}, fmt.Errorf("error. no patient lists found")
+	}
+
+	dates := []string{}
+	for _, ptList := range p.Slices {
+		dates = append(dates, ptList.Date.Format(dateFormat))
+	}
+
+	return dates, nil
+}
+
 func initPatientLists(c *config) error {
 	_, err := os.Stat(c.pathToSave)
 	fmt.Println("looking for saved data...")
