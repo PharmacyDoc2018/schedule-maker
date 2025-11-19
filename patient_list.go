@@ -145,17 +145,13 @@ func (p *PatientLists) RemoveList(patientList PatientList) error {
 	return fmt.Errorf("error. patient list for %s not found", patientList.Date.Format(dateFormat))
 }
 
-func (p *PatientLists) GetDates() ([]string, error) {
-	if len(p.Slices) == 0 {
-		return []string{}, fmt.Errorf("error. no patient lists found")
-	}
-
+func (p *PatientLists) GetDates() []string {
 	dates := []string{}
 	for _, ptList := range p.Slices {
 		dates = append(dates, ptList.Date.Format(dateFormat))
 	}
 
-	return dates, nil
+	return dates
 }
 
 func initPatientLists(c *config) error {

@@ -136,6 +136,9 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("appointmentTimeInfusion",
 				readline.PcItemDynamic(c.getPatientArgs),
 			),
+			readline.PcItem("patientList",
+				readline.PcItemDynamic(readlinePcDynamicItemHelper(c.PatientLists.GetDates)),
+			),
 		),
 		readline.PcItem("list",
 			readline.PcItem("ignoredOrders"),
@@ -184,6 +187,12 @@ func (c *config) readlineSetup() *readline.Instance {
 
 	return rl
 
+}
+
+func readlinePcDynamicItemHelper(f func() []string) func(string) []string {
+	return func(string) []string {
+		return f()
+	}
 }
 
 func (c *config) getPatientArgs(input string) []string {

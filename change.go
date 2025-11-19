@@ -108,3 +108,28 @@ func patientCommandChangeApptTimeInf(c *config) error {
 
 	return fmt.Errorf("error. infusion appointment not found for %s", patient.Name)
 }
+
+func homeCommandChangePatientList(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing argument\nexpected format: change patientList [date]")
+	}
+
+	ptListDateString := c.lastInput[2]
+	ptListDate, err := time.Parse(dateFormat, ptListDateString)
+	if err != nil {
+		return err
+	}
+
+	if len(c.PatientLists.Slices) == 0 {
+		return fmt.Errorf("error. no loaded patient lists")
+	}
+
+	for _, ptList := range c.PatientLists.Slices {
+		if isSameDay(ptList.Date, ptListDate) {
+			c.PatientList = ptList
+			return nil
+		}
+	}
+
+	return fmt.Errorf("error. patient list for %s not found", ptListDateString)
+}

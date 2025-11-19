@@ -203,6 +203,12 @@ func commandChange(c *config) error {
 				return err
 			}
 
+		case "patientList":
+			err := homeCommandChangePatientList(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s not a changeable item", firstArg)
 		}

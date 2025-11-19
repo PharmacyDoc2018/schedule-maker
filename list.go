@@ -50,9 +50,9 @@ func homeCommandListPrepullOrders(c *config) error {
 }
 
 func homeCommandListPatientLists(c *config) error {
-	dates, err := c.PatientLists.GetDates()
-	if err != nil {
-		return err
+	dates := c.PatientLists.GetDates()
+	if len(dates) == 0 {
+		return fmt.Errorf("error. no patient lists found")
 	}
 
 	for _, date := range dates {
