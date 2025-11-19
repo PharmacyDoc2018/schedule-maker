@@ -301,15 +301,39 @@ func (c *config) readlineLoopStartPreprocess() {
 
 	case Home:
 		var infusionPatientNum int
+		var remainingPatientNum int
 		for mrn := range c.PatientList.Map {
 			for appt := range c.PatientList.Map[mrn].AppointmentTimes {
 				if strings.Contains(appt, infusionAppointmentTag) {
 					infusionPatientNum++
+					if !c.PatientList.Map[mrn].VisitComplete {
+						remainingPatientNum++
+					}
 					break
 				}
 			}
 		}
-		fmt.Printf("Infusion Patients(%d). Missing Orders(%d):\n", infusionPatientNum, c.missingOrders.Len())
+
+		displayMessage := ""
+
+		if !isSameDay(c.PatientList.Date, time.Now()) {
+			displayMessage += c.PatientList.Date.Format(dateFormat) + ": "
+		}
+
+		displayMessage += fmt.Sprintf("Infusion Patients(%d)", infusionPatientNum)
+
+		if c.missingOrders.Len() > 0 {
+			displayMessage += fmt.Sprintf(". Missing Orders(%d)", c.missingOrders.Len())
+		}
+
+		if remainingPatientNum > 0 {
+			displayMessage += fmt.Sprintf(". Remaining Patients(%d)", remainingPatientNum)
+		} else {
+			displayMessage += "All patients completed"
+		}
+
+		displayMessage += ":"
+		fmt.Println(displayMessage)
 
 	case PatientLoc:
 		commandClear(c)
