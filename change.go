@@ -127,6 +127,7 @@ func homeCommandChangePatientList(c *config) error {
 	for _, ptList := range c.PatientLists.Slices {
 		if isSameDay(ptList.Date, ptListDate) {
 			c.PatientList = ptList
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
 			return nil
 		}
 	}
