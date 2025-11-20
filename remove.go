@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 func homeCommandRemoveOrder(c *config) error {
@@ -87,6 +88,35 @@ func homeCommandRemovePtSupplied(c *config) error {
 
 	fmt.Printf("%s for %s removed from Pt Supplied list\n", order, ptName)
 	return nil
+}
+
+func homeCommandRemovePatientList(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing date argument\nExpected format: remove patientList [date]")
+	}
+
+	ptListDateString := c.lastInput[2]
+	ptListDate, err := time.Parse(dateFormat, ptListDateString)
+	if err != nil {
+		return err
+	}
+
+	//patientLists := c.PatientLists
+	listToRemove := PatientList{}
+	listToRemove.Date = ptListDate
+	for _, ptList := range c.PatientLists.Slices {
+		if isSameDay(ptList.Date, listToRemove.Date) {
+			err := c.PatientLists.RemoveList(listToRemove)
+			if err != nil {
+				return err
+			}
+			//patientLists = c.PatientLists
+			fmt.Printf("patient list for %s removed\n", ptListDateString)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("error. no patient list found for %s", ptListDateString)
 }
 
 func patientCommandRemoveOrder(c *config) error {
