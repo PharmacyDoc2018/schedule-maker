@@ -101,7 +101,6 @@ func homeCommandRemovePatientList(c *config) error {
 		return err
 	}
 
-	//patientLists := c.PatientLists
 	listToRemove := PatientList{}
 	listToRemove.Date = ptListDate
 	for _, ptList := range c.PatientLists.Slices {
@@ -110,7 +109,6 @@ func homeCommandRemovePatientList(c *config) error {
 			if err != nil {
 				return err
 			}
-			//patientLists = c.PatientLists
 			fmt.Printf("patient list for %s removed\n", ptListDateString)
 			return nil
 		}

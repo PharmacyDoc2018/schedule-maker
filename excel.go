@@ -226,6 +226,11 @@ func pullDataFromExcel(c *config) (PatientLists, error) {
 		if err != nil {
 			fmt.Println(err.Error())
 		}
+
+		err = os.Remove(file.Path)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	return patientLists, nil
