@@ -115,9 +115,17 @@ func homeCommandChangePatientList(c *config) error {
 	}
 
 	ptListDateString := c.lastInput[2]
-	ptListDate, err := time.Parse(dateFormat, ptListDateString)
-	if err != nil {
-		return err
+	var ptListDate time.Time
+	var err error
+
+	if ptListDateString == "t" {
+		ptListDate = time.Now()
+		ptListDateString = "today"
+	} else {
+		ptListDate, err = time.Parse(dateFormat, ptListDateString)
+		if err != nil {
+			return err
+		}
 	}
 
 	if len(c.PatientLists.Slices) == 0 {
