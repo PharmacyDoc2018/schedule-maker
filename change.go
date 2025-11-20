@@ -129,6 +129,7 @@ func homeCommandChangePatientList(c *config) error {
 			commandSave(c)
 			c.PatientList = ptList
 			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
+			c.createPatientNameMap()
 			return nil
 		}
 	}
