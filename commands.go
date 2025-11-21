@@ -86,13 +86,18 @@ func getCommands() commandMapList {
 		},
 		"change": {
 			name:        "change",
-			description: "change the value of an i.em. i.e. appointment time",
+			description: "change the value of an item. i.e. appointment time",
 			callback:    commandChange,
 		},
 		"list": {
 			name:        "list",
 			description: "prints elements in a list",
 			callback:    commandList,
+		},
+		"load": {
+			name:        "load",
+			description: "loads data from a save file",
+			callback:    commandLoad,
 		},
 	}
 	return commands
@@ -555,6 +560,33 @@ func commandList(c *config) error {
 	default:
 		return fmt.Errorf("error. list command cannot be used from current node")
 
+	}
+
+	return nil
+}
+
+func commandLoad(c *config) error {
+	if len(c.lastInput) < 2 {
+		return fmt.Errorf("error. too few arguments")
+	}
+
+	firstArg := c.lastInput[1]
+
+	switch c.location.allNodes[c.location.currentNodeID].locType {
+	case Home:
+		switch firstArg {
+		case "excelData":
+			err := homeCommandLoadExcelData(c)
+			if err != nil {
+				return err
+			}
+
+		default:
+			return fmt.Errorf("error. %s not a loadable item", firstArg)
+		}
+
+	default:
+		return fmt.Errorf("error. load command cannot be used from current node")
 	}
 
 	return nil

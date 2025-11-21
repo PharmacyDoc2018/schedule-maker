@@ -148,6 +148,9 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("prepullOrders"),
 			readline.PcItem("patientLists"),
 		),
+		readline.PcItem("load",
+			readline.PcItem("excelData"),
+		),
 	)
 
 	completerMode[int(PatientLoc)] = readline.NewPrefixCompleter(
