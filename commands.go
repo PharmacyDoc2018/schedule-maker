@@ -279,9 +279,16 @@ func commandAdd(c *config) error {
 			if err != nil {
 				return err
 			}
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
 
 		case "prepullOrder":
 			err := homeCommandAddPrepullOrder(c)
+			if err != nil {
+				return err
+			}
+
+		case "patient":
+			err := homeCommandAddPatient(c)
 			if err != nil {
 				return err
 			}
@@ -297,6 +304,7 @@ func commandAdd(c *config) error {
 			if err != nil {
 				return err
 			}
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
 		}
 
 	default:
@@ -465,6 +473,7 @@ func commandRemove(c *config) error {
 			if err != nil {
 				return err
 			}
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
 
 		case "saveData":
 			err := homeCommandRemoveSaveData(c)
@@ -507,6 +516,7 @@ func commandRemove(c *config) error {
 			if err != nil {
 				return err
 			}
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
 
 		case "ptSupplied":
 			err := patientCommandRemovePtSupplied(c)

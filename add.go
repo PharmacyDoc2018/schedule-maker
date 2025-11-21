@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 )
 
 func homeCommandAddIgnoredOrder(c *config) error {
@@ -52,6 +55,55 @@ func homeCommandAddOrder(c *config) error {
 
 	fmt.Printf("order: %s added for %s\n", order, ptName)
 
+	return nil
+}
+
+func homeCommandAddPatient(c *config) error {
+	addPatientScanner := bufio.NewScanner(os.Stdin)
+	prompts := []string{
+		"MRN: ",
+		"Name: ",
+		"Appointment Time: ",
+		"Apptintment Type: ",
+	}
+	inputs := []string{}
+
+	for i := 0; i <= 3; i++ {
+		fmt.Print(prompts[i])
+		addPatientScanner.Scan()
+		input := addPatientScanner.Text()
+		inputs = append(inputs, input)
+	}
+
+	mrn := inputs[0]
+	name := inputs[1]
+	apptTimeString := inputs[2]
+	apptType := inputs[3]
+
+	err := c.PatientList.addPatient(mrn, name)
+	if err != nil {
+		return err
+	}
+
+	scheduleType := func(apptType string) string {
+		switch apptType {
+		case "inf", "INF", "infusion", "Infusion", "AUBL INF":
+			return infusionAppointmentTag
+
+		default:
+			return "AUBL CANC"
+		}
+	}(apptType)
+
+	err = c.PatientList.addAppointment(mrn, scheduleType, time.Now().Format(dateFormat), apptTimeString)
+	if err != nil {
+		return fmt.Errorf("error. patient added, but unable to add appointment: %s", err.Error())
+	}
+
+	fmt.Printf("%s successfully added to the schedule\n", name)
+	c.createPatientNameMap()
+	c.missingOrders = c.PatientList.FindMissingInfusionOrders()
+	commandSave(c)
 	return nil
 }
 

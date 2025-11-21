@@ -110,6 +110,7 @@ func homeCommandRemovePatientList(c *config) error {
 				return err
 			}
 			fmt.Printf("patient list for %s removed\n", ptListDateString)
+			commandSave(c)
 			return nil
 		}
 	}
