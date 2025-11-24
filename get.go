@@ -186,7 +186,7 @@ func homeCommandGetOrders(c *config) error {
 		return fmt.Errorf("error. too few arguments\nExpected format: get orders [partial order name]")
 	}
 
-	orderSearchable := strings.Join(c.lastInput[2:], " ")
+	orderSearchable := strings.ReplaceAll(strings.ToLower(strings.Join(c.lastInput[2:], " ")), " ", "")
 
 	schedule := c.CreateSchedule()
 	schedule.colSpaceBuffer = 2
@@ -210,7 +210,8 @@ func homeCommandGetOrders(c *config) error {
 			lastName = row[2]
 		}
 
-		if strings.Contains(row[3], orderSearchable) {
+		currentOrder := strings.ReplaceAll(strings.ToLower(row[3]), " ", "")
+		if strings.Contains(currentOrder, orderSearchable) {
 			newTable = append(newTable, []string{
 				lastTime,
 				lastMRN,
