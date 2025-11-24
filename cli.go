@@ -371,14 +371,26 @@ func (c *config) readlineLoopStartPreprocess() {
 		if len(c.PatientList.Map[mrn].Orders) == 0 {
 			fmt.Println("Current Orders: None")
 		} else {
-			fmt.Println("Current Orders:")
+			currentOrders := []string{}
+			ignoredOrders := []string{}
 			for _, order := range c.PatientList.Map[mrn].Orders {
-				if c.PtSupplyOrders.IsPatientSupplied(mrn, order) {
-					fmt.Println(" ", "[Pt Supplied]", order, "[Pt Supplied]")
+				if c.IgnoredOrders.Exists(order) {
+					ignoredOrders = append(ignoredOrders, order)
+				} else if c.PtSupplyOrders.IsPatientSupplied(mrn, order) {
+					currentOrders = append(currentOrders, fmt.Sprintf("[Pt Supplied] %s [Pt Supplied]", order))
 				} else {
-					fmt.Println(" ", order)
+					currentOrders = append(currentOrders, order)
 				}
 			}
+			fmt.Println("Current Orders:")
+			for _, order := range currentOrders {
+				fmt.Println(" ", order)
+			}
+			fmt.Println("Other Orders:")
+			for _, order := range ignoredOrders {
+				fmt.Println(" ", order)
+			}
+
 		}
 		fmt.Println()
 	}
