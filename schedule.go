@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 )
 
 const infusionAppointmentTag = "AUBL INF"
@@ -280,4 +282,69 @@ func (s Schedule) Print(c *config, filters []string) {
 		cTop = cBottom + 1
 	}
 	fmt.Println(rowSeperator)
+}
+
+func (c *config) CreateSchedule() Schedule {
+	schedule := Schedule{}
+
+	type infAppt struct {
+		time   string
+		mrn    string
+		name   string
+		orders []string
+	}
+
+	infApptSlices := []infAppt{}
+	for _, patient := range c.PatientList.Map {
+		for appt, apptTime := range patient.AppointmentTimes {
+			if strings.Contains(appt, infusionAppointmentTag) {
+				ordersSlice := []string{}
+				for _, order := range patient.Orders {
+					ordersSlice = append(ordersSlice, order)
+				}
+				infApptSlices = append(infApptSlices, infAppt{
+					time:   apptTime.Format(timeFormat),
+					mrn:    patient.Mrn,
+					name:   patient.Name,
+					orders: ordersSlice,
+				})
+				break
+			}
+		}
+	}
+
+	sort.Slice(infApptSlices, func(i, j int) bool {
+		a, _ := time.Parse(timeFormat, infApptSlices[i].time)
+		b, _ := time.Parse(timeFormat, infApptSlices[j].time)
+		return a.Before(b)
+	})
+
+	for _, appt := range infApptSlices {
+		if len(appt.orders) > 0 {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				appt.orders[0],
+			})
+			for _, order := range appt.orders[1:] {
+				schedule.table = append(schedule.table, []string{
+					"",
+					"",
+					"",
+					order,
+				})
+			}
+		} else {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				"",
+			})
+		}
+
+	}
+
+	return schedule
 }

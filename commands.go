@@ -332,11 +332,9 @@ func commandGet(c *config) error {
 			switch secondArg {
 			case "infusion", "-i", "inf":
 				homeCommandGetScheduleInf(c)
-				return nil
 
 			case "clinic", "-c":
 				//homeCommandGetScheduleClinic()
-				return nil
 
 			default:
 				return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
@@ -354,7 +352,6 @@ func commandGet(c *config) error {
 				if err != nil {
 					return err
 				}
-				return nil
 
 			default:
 				return fmt.Errorf("error. unknown next item: %s not found", secondArg)
@@ -367,7 +364,12 @@ func commandGet(c *config) error {
 				return err
 			}
 
-			return nil
+		case "orders":
+			commandClear(c)
+			err := homeCommandGetOrders(c)
+			if err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("error. unknown argument: %s not found", firstArg)
@@ -375,6 +377,8 @@ func commandGet(c *config) error {
 	default:
 		return fmt.Errorf("get command cannot be used at the current location")
 	}
+
+	return nil
 }
 
 func commandReview(c *config) error {

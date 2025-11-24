@@ -4,72 +4,12 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 )
 
 func homeCommandGetScheduleInf(c *config) {
-	schedule := Schedule{
-		colSpaceBuffer: 2,
-	}
+	schedule := c.CreateSchedule()
 
-	type infAppt struct {
-		time   string
-		mrn    string
-		name   string
-		orders []string
-	}
-
-	infApptSlices := []infAppt{}
-	for _, patient := range c.PatientList.Map {
-		for appt, apptTime := range patient.AppointmentTimes {
-			if strings.Contains(appt, infusionAppointmentTag) {
-				ordersSlice := []string{}
-				for _, order := range patient.Orders {
-					ordersSlice = append(ordersSlice, order)
-				}
-				infApptSlices = append(infApptSlices, infAppt{
-					time:   apptTime.Format(timeFormat),
-					mrn:    patient.Mrn,
-					name:   patient.Name,
-					orders: ordersSlice,
-				})
-				break
-			}
-		}
-	}
-
-	sort.Slice(infApptSlices, func(i, j int) bool {
-		a, _ := time.Parse(timeFormat, infApptSlices[i].time)
-		b, _ := time.Parse(timeFormat, infApptSlices[j].time)
-		return a.Before(b)
-	})
-
-	for _, appt := range infApptSlices {
-		if len(appt.orders) > 0 {
-			schedule.table = append(schedule.table, []string{
-				appt.time,
-				appt.mrn,
-				appt.name,
-				appt.orders[0],
-			})
-			for _, order := range appt.orders[1:] {
-				schedule.table = append(schedule.table, []string{
-					"",
-					"",
-					"",
-					order,
-				})
-			}
-		} else {
-			schedule.table = append(schedule.table, []string{
-				appt.time,
-				appt.mrn,
-				appt.name,
-				"",
-			})
-		}
-
-	}
+	schedule.colSpaceBuffer = 2
 
 	filters := []string{"defaultOrderFilter", "defaultPatientFilterDone"}
 	if len(c.lastInput) > 3 {
@@ -238,5 +178,49 @@ func homeCommandGetPrepullOrders(c *config) error {
 		fmt.Printf("%s%s%s%s\n", timeText, typeText, nameText, orderText)
 	}
 
+	return nil
+}
+
+func homeCommandGetOrders(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. too few arguments\nExpected format: get orders [partial order name]")
+	}
+
+	orderSearchable := strings.Join(c.lastInput[2:], " ")
+
+	schedule := c.CreateSchedule()
+	schedule.colSpaceBuffer = 2
+
+	lastTime := ""
+	lastMRN := ""
+	lastName := ""
+
+	newTable := [][]string{}
+
+	for _, row := range schedule.table {
+		if row[0] != "" {
+			lastTime = row[0]
+		}
+
+		if row[1] != "" {
+			lastMRN = row[1]
+		}
+
+		if row[2] != "" {
+			lastName = row[2]
+		}
+
+		if strings.Contains(row[3], orderSearchable) {
+			newTable = append(newTable, []string{
+				lastTime,
+				lastMRN,
+				lastName,
+				row[3],
+			})
+		}
+	}
+
+	schedule.table = newTable
+	schedule.Print(c, []string{})
 	return nil
 }
