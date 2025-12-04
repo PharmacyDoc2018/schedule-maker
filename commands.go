@@ -292,6 +292,9 @@ func commandAdd(c *config) error {
 			if err != nil {
 				return err
 			}
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
+			c.createPatientNameMap()
+			commandSave(c)
 
 		default:
 			return fmt.Errorf("unknown item to add: %s not found", firstArg)
@@ -508,6 +511,15 @@ func commandRemove(c *config) error {
 			if err != nil {
 				return err
 			}
+
+		case "patient":
+			err := homeCommandRemovePatient(c)
+			if err != nil {
+				return err
+			}
+			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
+			c.createPatientNameMap()
+			commandSave(c)
 
 		default:
 			return fmt.Errorf("error. %s is not a removable element", firstArg)

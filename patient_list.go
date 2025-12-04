@@ -40,6 +40,16 @@ func (p *PatientList) addPatient(mrn, name string) error {
 	return nil
 }
 
+func (p *PatientList) removePatient(mrn string) error {
+	if _, ok := p.Map[mrn]; !ok {
+		return fmt.Errorf("patient not found")
+	}
+
+	delete(p.Map, mrn)
+	return nil
+
+}
+
 func (p *PatientList) addAppointment(mrn, schedule, date, time string) error {
 	apptDateTime, err := parseDateTime(date, time)
 	if err != nil {

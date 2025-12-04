@@ -101,9 +101,6 @@ func homeCommandAddPatient(c *config) error {
 	}
 
 	fmt.Printf("%s successfully added to the schedule\n", name)
-	c.createPatientNameMap()
-	c.missingOrders = c.PatientList.FindMissingInfusionOrders()
-	commandSave(c)
 	return nil
 }
 

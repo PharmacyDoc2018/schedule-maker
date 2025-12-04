@@ -118,6 +118,27 @@ func homeCommandRemovePatientList(c *config) error {
 	return fmt.Errorf("error. no patient list found for %s", ptListDateString)
 }
 
+func homeCommandRemovePatient(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing patient name")
+	}
+
+	mrn, err := c.FindPatientInInput(2)
+	if err != nil {
+		return err
+	}
+
+	ptName := c.PatientList.Map[mrn].Name
+
+	err = c.PatientList.removePatient(mrn)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s has been removed from the current patient list\n", ptName)
+	return nil
+}
+
 func patientCommandRemoveOrder(c *config) error {
 	if len(c.lastInput) < 3 {
 		return fmt.Errorf("error. too few arguments.\nExpected format: remove order [pt name] [order name]")
