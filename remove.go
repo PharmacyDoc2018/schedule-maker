@@ -92,7 +92,7 @@ func homeCommandRemovePtSupplied(c *config) error {
 
 func homeCommandRemovePatientList(c *config) error {
 	if len(c.lastInput) < 3 {
-		return fmt.Errorf("error. missing date argument\nExpected format: remove patientList [date]")
+		return fmt.Errorf("error. missing date argument\nExpected format: remove ptList [date]")
 	}
 
 	ptListDateString := c.lastInput[2]
@@ -136,6 +136,29 @@ func homeCommandRemovePatient(c *config) error {
 	}
 
 	fmt.Printf("%s has been removed from the current patient list\n", ptName)
+	return nil
+}
+
+func homeCommandRemoveDone(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing patient name")
+	}
+
+	mrn, err := c.FindPatientInInput(2)
+	if err != nil {
+		return err
+	}
+
+	if !c.PatientList.Map[mrn].VisitComplete {
+		return fmt.Errorf("error. day for %s not completed", c.PatientList.Map[mrn].Name)
+	}
+
+	patient := c.PatientList.Map[mrn]
+	patient.VisitComplete = false
+	c.PatientList.Map[mrn] = patient
+
+	fmt.Printf("%s added back to the schedule\n", patient.Name)
+
 	return nil
 }
 

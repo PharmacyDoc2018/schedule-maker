@@ -208,7 +208,7 @@ func commandChange(c *config) error {
 				return err
 			}
 
-		case "patientList":
+		case "ptList":
 			err := homeCommandChangePatientList(c)
 			if err != nil {
 				return err
@@ -506,7 +506,7 @@ func commandRemove(c *config) error {
 				return err
 			}
 
-		case "patientList":
+		case "ptList":
 			err := homeCommandRemovePatientList(c)
 			if err != nil {
 				return err
@@ -520,6 +520,12 @@ func commandRemove(c *config) error {
 			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
 			c.createPatientNameMap()
 			commandSave(c)
+
+		case "done":
+			err := homeCommandRemoveDone(c)
+			if err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("error. %s is not a removable element", firstArg)
@@ -573,7 +579,7 @@ func commandList(c *config) error {
 				return err
 			}
 
-		case "patientLists":
+		case "ptLists":
 			err := homeCommandListPatientLists(c)
 			if err != nil {
 				return err
