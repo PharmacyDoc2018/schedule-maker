@@ -97,7 +97,8 @@ func homeCommandAddPatient(c *config) error {
 
 	err = c.PatientList.addAppointment(mrn, scheduleType, time.Now().Format(dateFormat), apptTimeString)
 	if err != nil {
-		return fmt.Errorf("error. patient added, but unable to add appointment: %s", err.Error())
+		fmt.Printf("error. patient added, but unable to add appointment: %s\n", err.Error())
+		return nil
 	}
 
 	fmt.Printf("%s successfully added to the schedule\n", name)
