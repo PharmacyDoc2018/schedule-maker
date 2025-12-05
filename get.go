@@ -186,43 +186,71 @@ func homeCommandGetOrders(c *config) error {
 		return fmt.Errorf("error. too few arguments\nExpected format: get orders [partial order name]")
 	}
 
-	orderSearchable := strings.ReplaceAll(strings.ToLower(strings.Join(c.lastInput[2:], " ")), " ", "")
+	ptLists := []PatientList{}
 
-	schedule := c.CreateSchedule(c.PatientList)
-	schedule.colSpaceBuffer = 2
-
-	lastTime := ""
-	lastMRN := ""
-	lastName := ""
-
-	newTable := [][]string{}
-
-	for _, row := range schedule.table {
-		if row[0] != "" {
-			lastTime = row[0]
+	parsedInput := []string{}
+	for _, word := range c.lastInput {
+		if word == "-a" {
+			ptLists = c.PatientLists.Slices
+			continue
 		}
-
-		if row[1] != "" {
-			lastMRN = row[1]
-		}
-
-		if row[2] != "" {
-			lastName = row[2]
-		}
-
-		currentOrder := strings.ReplaceAll(strings.ToLower(row[3]), " ", "")
-		if strings.Contains(currentOrder, orderSearchable) {
-			newTable = append(newTable, []string{
-				lastTime,
-				lastMRN,
-				lastName,
-				row[3],
-			})
-		}
+		parsedInput = append(parsedInput, word)
 	}
 
-	schedule.table = newTable
-	schedule.Print(c, []string{})
+	c.lastInput = parsedInput
+
+	if len(ptLists) == 0 {
+		ptLists = append(ptLists, c.PatientList)
+	} else {
+		sort.Slice(ptLists, func(i, j int) bool {
+			return ptLists[i].Date.Before(ptLists[j].Date)
+		})
+	}
+
+	orderSearchable := strings.ReplaceAll(strings.ToLower(strings.Join(c.lastInput[2:], " ")), " ", "")
+
+	for _, list := range ptLists {
+		fmt.Printf("%s:\n", list.Date.Format(dateFormat))
+		func(ptList PatientList) {
+			schedule := c.CreateSchedule(ptList)
+			schedule.colSpaceBuffer = 2
+
+			lastTime := ""
+			lastMRN := ""
+			lastName := ""
+
+			newTable := [][]string{}
+
+			for _, row := range schedule.table {
+				if row[0] != "" {
+					lastTime = row[0]
+				}
+
+				if row[1] != "" {
+					lastMRN = row[1]
+				}
+
+				if row[2] != "" {
+					lastName = row[2]
+				}
+
+				currentOrder := strings.ReplaceAll(strings.ToLower(row[3]), " ", "")
+				if strings.Contains(currentOrder, orderSearchable) {
+					newTable = append(newTable, []string{
+						lastTime,
+						lastMRN,
+						lastName,
+						row[3],
+					})
+				}
+			}
+
+			schedule.table = newTable
+			schedule.Print(c, []string{})
+
+		}(list)
+	}
+
 	return nil
 }
 
@@ -237,6 +265,9 @@ func homeCommandGetPtSupplied(c *config) error {
 		switch c.lastInput[2] {
 		case "-a":
 			ptLists = c.PatientLists.Slices
+			sort.Slice(ptLists, func(i, j int) bool {
+				return ptLists[i].Date.Before(ptLists[j].Date)
+			})
 
 		default:
 			return fmt.Errorf("error. invalid argument %s", c.lastInput[2])
