@@ -456,6 +456,12 @@ func commandMark(c *config) error {
 				return err
 			}
 
+		case "done":
+			err := patientCommandMarkDone(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s is not a markable item", firstArg)
 		}

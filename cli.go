@@ -172,6 +172,7 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItemDynamic(c.GetPatientOrdersFromLoc),
 			),
 			readline.PcItem("ptSupplied"),
+			readline.PcItem("done"),
 		),
 		readline.PcItem("remove",
 			readline.PcItem("order",
@@ -353,7 +354,12 @@ func (c *config) readlineLoopStartPreprocess() {
 		commandClear(c)
 		mrn := c.location.allNodes[c.location.currentNodeID].name
 		pt := c.PatientList.Map[mrn]
-		fmt.Printf("Selected Patient: %s (%s)\n\n", pt.Name, pt.Mrn)
+		fmt.Printf("Selected Patient: %s (%s)\n", pt.Name, pt.Mrn)
+
+		if c.PatientList.Map[mrn].VisitComplete {
+			fmt.Println("-- Visit Completed --")
+		}
+		fmt.Println()
 
 		if len(c.PatientList.Map[mrn].AppointmentTimes) == 0 {
 			fmt.Println("Appointments: None")

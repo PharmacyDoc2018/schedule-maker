@@ -129,3 +129,18 @@ func patientCommandMarkPtSupplied(c *config) error {
 	return nil
 
 }
+
+func patientCommandMarkDone(c *config) error {
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+
+	if c.PatientList.Map[mrn].VisitComplete {
+		return fmt.Errorf("error. day already complete for %s", c.PatientList.Map[mrn].Name)
+	}
+
+	patient := c.PatientList.Map[mrn]
+	patient.VisitComplete = true
+	c.PatientList.Map[mrn] = patient
+
+	return nil
+
+}
