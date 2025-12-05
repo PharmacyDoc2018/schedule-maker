@@ -225,3 +225,42 @@ func homeCommandGetOrders(c *config) error {
 	schedule.Print(c, []string{})
 	return nil
 }
+
+func homeCommandGetPtSupplied(c *config) error {
+	schedule := c.CreateSchedule()
+	schedule.colSpaceBuffer = 2
+
+	lastTime := ""
+	lastMRN := ""
+	lastName := ""
+
+	newTable := [][]string{}
+
+	for _, row := range schedule.table {
+		if row[0] != "" {
+			lastTime = row[0]
+		}
+
+		if row[1] != "" {
+			lastMRN = row[1]
+		}
+
+		if row[2] != "" {
+			lastName = row[2]
+		}
+
+		if c.PtSupplyOrders.IsPatientSupplied(lastMRN, row[3]) {
+			newTable = append(newTable, []string{
+				lastTime,
+				lastMRN,
+				lastName,
+				row[3],
+			})
+		}
+	}
+
+	schedule.table = newTable
+	schedule.Print(c, []string{})
+	return nil
+
+}

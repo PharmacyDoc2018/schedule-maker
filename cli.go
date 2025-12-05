@@ -87,6 +87,7 @@ func (c *config) readlineSetup() *readline.Instance {
 				readline.PcItem("missingOrderPatient"),
 			),
 			readline.PcItem("orders"),
+			readline.PcItem("ptSupplied"),
 		),
 		readline.PcItem("clear"),
 		readline.PcItem("review",

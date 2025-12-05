@@ -374,6 +374,13 @@ func commandGet(c *config) error {
 				return err
 			}
 
+		case "ptSupplied":
+			commandClear(c)
+			err := homeCommandGetPtSupplied(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. unknown argument: %s not found", firstArg)
 		}
