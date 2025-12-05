@@ -350,7 +350,7 @@ func (c *config) readlineLoopStartPreprocess() {
 		if remainingPatientNum > 0 {
 			displayMessage += fmt.Sprintf(". Remaining Patients(%d)", remainingPatientNum)
 		} else {
-			displayMessage += "All patients completed"
+			displayMessage += ". All patients completed"
 		}
 
 		displayMessage += ":"
