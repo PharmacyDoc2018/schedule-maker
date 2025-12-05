@@ -198,3 +198,17 @@ func patientCommandRemovePtSupplied(c *config) error {
 	return nil
 
 }
+
+func patientCommandRemoveDone(c *config) error {
+	mrn := c.location.allNodes[c.location.currentNodeID].name
+
+	if !c.PatientList.Map[mrn].VisitComplete {
+		return fmt.Errorf("error. day for %s not completed", c.PatientList.Map[mrn].Name)
+	}
+
+	patient := c.PatientList.Map[mrn]
+	patient.VisitComplete = false
+	c.PatientList.Map[mrn] = patient
+
+	return nil
+}

@@ -181,6 +181,7 @@ func (c *config) readlineSetup() *readline.Instance {
 			readline.PcItem("ptSupplied",
 				readline.PcItemDynamic(c.GetPatientOrdersFromLoc),
 			),
+			readline.PcItem("done"),
 		),
 		readline.PcItem("change",
 			readline.PcItem("apptTimeInf"),
