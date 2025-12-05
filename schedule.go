@@ -284,7 +284,7 @@ func (s Schedule) Print(c *config, filters []string) {
 	fmt.Println(rowSeperator)
 }
 
-func (c *config) CreateSchedule() Schedule {
+func (c *config) CreateSchedule(ptList PatientList) Schedule {
 	schedule := Schedule{}
 
 	type infAppt struct {
@@ -295,7 +295,7 @@ func (c *config) CreateSchedule() Schedule {
 	}
 
 	infApptSlices := []infAppt{}
-	for _, patient := range c.PatientList.Map {
+	for _, patient := range ptList.Map {
 		for appt, apptTime := range patient.AppointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) {
 				ordersSlice := []string{}

@@ -7,7 +7,7 @@ import (
 )
 
 func homeCommandGetScheduleInf(c *config) {
-	schedule := c.CreateSchedule()
+	schedule := c.CreateSchedule(c.PatientList)
 
 	schedule.colSpaceBuffer = 2
 
@@ -188,7 +188,7 @@ func homeCommandGetOrders(c *config) error {
 
 	orderSearchable := strings.ReplaceAll(strings.ToLower(strings.Join(c.lastInput[2:], " ")), " ", "")
 
-	schedule := c.CreateSchedule()
+	schedule := c.CreateSchedule(c.PatientList)
 	schedule.colSpaceBuffer = 2
 
 	lastTime := ""
@@ -227,40 +227,67 @@ func homeCommandGetOrders(c *config) error {
 }
 
 func homeCommandGetPtSupplied(c *config) error {
-	schedule := c.CreateSchedule()
-	schedule.colSpaceBuffer = 2
+	if len(c.lastInput) > 3 {
+		return fmt.Errorf("error. too many arguments")
+	}
 
-	lastTime := ""
-	lastMRN := ""
-	lastName := ""
+	ptLists := []PatientList{}
 
-	newTable := [][]string{}
+	if len(c.lastInput) == 3 {
+		switch c.lastInput[2] {
+		case "-a":
+			ptLists = c.PatientLists.Slices
 
-	for _, row := range schedule.table {
-		if row[0] != "" {
-			lastTime = row[0]
-		}
-
-		if row[1] != "" {
-			lastMRN = row[1]
-		}
-
-		if row[2] != "" {
-			lastName = row[2]
-		}
-
-		if c.PtSupplyOrders.IsPatientSupplied(lastMRN, row[3]) {
-			newTable = append(newTable, []string{
-				lastTime,
-				lastMRN,
-				lastName,
-				row[3],
-			})
+		default:
+			return fmt.Errorf("error. invalid argument %s", c.lastInput[2])
 		}
 	}
 
-	schedule.table = newTable
-	schedule.Print(c, []string{})
+	if len(c.lastInput) == 2 {
+		ptLists = []PatientList{c.PatientList}
+	}
+
+	for _, list := range ptLists {
+		fmt.Printf("%s:\n", list.Date.Format(dateFormat))
+		func(ptList PatientList) {
+			schedule := c.CreateSchedule(ptList)
+			schedule.colSpaceBuffer = 2
+
+			lastTime := ""
+			lastMRN := ""
+			lastName := ""
+
+			newTable := [][]string{}
+
+			for _, row := range schedule.table {
+				if row[0] != "" {
+					lastTime = row[0]
+				}
+
+				if row[1] != "" {
+					lastMRN = row[1]
+				}
+
+				if row[2] != "" {
+					lastName = row[2]
+				}
+
+				if c.PtSupplyOrders.IsPatientSupplied(lastMRN, row[3]) {
+					newTable = append(newTable, []string{
+						lastTime,
+						lastMRN,
+						lastName,
+						row[3],
+					})
+				}
+			}
+
+			schedule.table = newTable
+			schedule.Print(c, []string{})
+
+		}(list)
+	}
+
 	return nil
 
 }
