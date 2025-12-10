@@ -238,11 +238,28 @@ func initPatientLists(c *config) error {
 							for orderNum, orderName := range oldPtList.Map[mrn].Orders {
 								newPtList.Map[mrn].Orders[orderNum] = orderName
 							}
-						} else if len(patient.Orders) != len(oldPtList.Map[mrn].Orders) {
+						} else {
+							manualOrderList := map[string]string{}
 							for orderNum, orderName := range oldPtList.Map[mrn].Orders {
 								runes := []rune(orderNum)
 								if runes[0] == 'U' {
-									newPtList.Map[mrn].Orders[orderNum] = orderName
+									manualOrderList[orderNum] = orderName
+								}
+							}
+
+							if len(manualOrderList) != 0 {
+								for manOrderNum, manOrderName := range manualOrderList {
+									needToAdd := func(manOrderName string) bool {
+										for _, currentOrderName := range patient.Orders {
+											if currentOrderName == manOrderName {
+												return false
+											}
+										}
+										return true
+									}(manOrderName)
+									if needToAdd {
+										newPtList.Map[mrn].Orders[manOrderNum] = manOrderName
+									}
 								}
 							}
 						}
