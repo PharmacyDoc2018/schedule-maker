@@ -404,6 +404,7 @@ func (c *config) readlineLoopStartPreprocess() {
 			for _, order := range currentOrders {
 				fmt.Println(" ", order)
 			}
+			fmt.Println()
 			fmt.Println("Other Orders:")
 			for _, order := range ignoredOrders {
 				fmt.Println(" ", order)
