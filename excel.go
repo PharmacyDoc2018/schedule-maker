@@ -168,12 +168,6 @@ func pullDataFromExcel(c *config) (PatientLists, error) {
 		return PatientLists{}, err
 	}
 
-	if len(entries) == 0 {
-		return PatientLists{}, fmt.Errorf("no excel files found")
-	}
-
-	fmt.Println("excel files found! pulling data...")
-
 	canDelete := false
 	for i, entry := range entries {
 		if entry.Name() == ".allow-delete" {
@@ -185,6 +179,12 @@ func pullDataFromExcel(c *config) (PatientLists, error) {
 	if !canDelete {
 		return PatientLists{}, fmt.Errorf("error. not authorized to access excel files at this filepath")
 	}
+
+	if len(entries) == 0 {
+		return PatientLists{}, fmt.Errorf("no excel files found")
+	}
+
+	fmt.Println("excel files found! pulling data...")
 
 	files := []*excelize.File{}
 	for _, entry := range entries {
