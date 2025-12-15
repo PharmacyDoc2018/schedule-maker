@@ -631,6 +631,7 @@ func commandLoad(c *config) error {
 			if err != nil {
 				return err
 			}
+			commandSave(c)
 
 		default:
 			return fmt.Errorf("error. %s not a loadable item", firstArg)

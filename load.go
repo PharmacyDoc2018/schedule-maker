@@ -42,10 +42,14 @@ func homeCommandLoadExcelData(c *config) error {
 					}
 				} else {
 					manualOrderList := map[string]string{}
+					markedOrderList := map[string]string{}
 					for orderNum, orderName := range oldPtList.Map[mrn].Orders {
 						runes := []rune(orderNum)
+						orderNameRunes := []rune(orderName)
 						if runes[0] == 'U' {
 							manualOrderList[orderNum] = orderName
+						} else if orderNameRunes[0] == '\'' {
+							markedOrderList[orderNum] = orderName
 						}
 					}
 
@@ -61,6 +65,14 @@ func homeCommandLoadExcelData(c *config) error {
 							}(manOrderName)
 							if needToAdd {
 								newPtList.Map[mrn].Orders[manOrderNum] = manOrderName
+							}
+						}
+					}
+
+					if len(markedOrderList) != 0 {
+						for markedOrderNum, markedOrderName := range markedOrderList {
+							if _, ok := patient.Orders[markedOrderNum]; ok {
+								newPtList.Map[mrn].Orders[markedOrderNum] = markedOrderName
 							}
 						}
 					}
