@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"sort"
+	"time"
 )
 
 func homeCommandListIgnoredOrders(c *config) error {
@@ -54,6 +55,25 @@ func homeCommandListPatientLists(c *config) error {
 	if len(dates) == 0 {
 		return fmt.Errorf("error. no patient lists found")
 	}
+
+	sort.Slice(dates, func(i, j int) bool {
+		dateStringOne := dates[i]
+		dateStringTwo := dates[j]
+
+		dateOne, err := time.Parse(dateFormat, dateStringOne)
+		if err != nil {
+			fmt.Println(err.Error())
+			return false
+		}
+
+		dateTwo, err := time.Parse(dateFormat, dateStringTwo)
+		if err != nil {
+			fmt.Println(err.Error())
+			return false
+		}
+
+		return dateOne.Before(dateTwo)
+	})
 
 	for _, date := range dates {
 		fmt.Println(date)
