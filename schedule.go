@@ -8,6 +8,7 @@ import (
 )
 
 const infusionAppointmentTag = "AUBL INF"
+const nurseAppointmentTag = "AUBL NURSE"
 const orderNumberLength = 9
 const timeFormat = "3:04 PM"
 const dateFormat = "01-02-06"
@@ -297,6 +298,72 @@ func (c *config) CreateSchedule(ptList PatientList) Schedule {
 	infApptSlices := []infAppt{}
 	for _, patient := range ptList.Map {
 		for appt, apptTime := range patient.AppointmentTimes {
+			if strings.Contains(appt, infusionAppointmentTag) ||
+				strings.Contains(appt, nurseAppointmentTag) {
+				ordersSlice := []string{}
+				for _, order := range patient.Orders {
+					ordersSlice = append(ordersSlice, order)
+				}
+				infApptSlices = append(infApptSlices, infAppt{
+					time:   apptTime.Format(timeFormat),
+					mrn:    patient.Mrn,
+					name:   patient.Name,
+					orders: ordersSlice,
+				})
+				break
+			}
+		}
+	}
+
+	sort.Slice(infApptSlices, func(i, j int) bool {
+		a, _ := time.Parse(timeFormat, infApptSlices[i].time)
+		b, _ := time.Parse(timeFormat, infApptSlices[j].time)
+		return a.Before(b)
+	})
+
+	for _, appt := range infApptSlices {
+		if len(appt.orders) > 0 {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				appt.orders[0],
+			})
+			for _, order := range appt.orders[1:] {
+				schedule.table = append(schedule.table, []string{
+					"",
+					"",
+					"",
+					order,
+				})
+			}
+		} else {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				"",
+			})
+		}
+
+	}
+
+	return schedule
+}
+
+func (c *config) CreateInfSchedule(ptList PatientList) Schedule {
+	schedule := Schedule{}
+
+	type infAppt struct {
+		time   string
+		mrn    string
+		name   string
+		orders []string
+	}
+
+	infApptSlices := []infAppt{}
+	for _, patient := range ptList.Map {
+		for appt, apptTime := range patient.AppointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) {
 				ordersSlice := []string{}
 				for _, order := range patient.Orders {
@@ -320,6 +387,71 @@ func (c *config) CreateSchedule(ptList PatientList) Schedule {
 	})
 
 	for _, appt := range infApptSlices {
+		if len(appt.orders) > 0 {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				appt.orders[0],
+			})
+			for _, order := range appt.orders[1:] {
+				schedule.table = append(schedule.table, []string{
+					"",
+					"",
+					"",
+					order,
+				})
+			}
+		} else {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				"",
+			})
+		}
+
+	}
+
+	return schedule
+}
+
+func (c *config) CreateRNSchedule(ptList PatientList) Schedule {
+	schedule := Schedule{}
+
+	type rnAppt struct {
+		time   string
+		mrn    string
+		name   string
+		orders []string
+	}
+
+	rnApptSlices := []rnAppt{}
+	for _, patient := range ptList.Map {
+		for appt, apptTime := range patient.AppointmentTimes {
+			if strings.Contains(appt, nurseAppointmentTag) {
+				ordersSlice := []string{}
+				for _, order := range patient.Orders {
+					ordersSlice = append(ordersSlice, order)
+				}
+				rnApptSlices = append(rnApptSlices, rnAppt{
+					time:   apptTime.Format(timeFormat),
+					mrn:    patient.Mrn,
+					name:   patient.Name,
+					orders: ordersSlice,
+				})
+				break
+			}
+		}
+	}
+
+	sort.Slice(rnApptSlices, func(i, j int) bool {
+		a, _ := time.Parse(timeFormat, rnApptSlices[i].time)
+		b, _ := time.Parse(timeFormat, rnApptSlices[j].time)
+		return a.Before(b)
+	})
+
+	for _, appt := range rnApptSlices {
 		if len(appt.orders) > 0 {
 			schedule.table = append(schedule.table, []string{
 				appt.time,
