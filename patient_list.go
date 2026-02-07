@@ -110,6 +110,23 @@ func (p *PatientList) FindMissingInfusionOrders() missingOrdersQueue {
 	return moq
 }
 
+func (p *PatientList) FindMissingInfusionAndRnInjOrders() missingOrdersQueue {
+	moq := missingOrdersQueue{}
+	for mrn := range p.Map {
+		if len(p.Map[mrn].Orders) == noOrders {
+			for appt := range p.Map[mrn].AppointmentTimes {
+				if strings.Contains(appt, infusionAppointmentTag) ||
+					strings.Contains(appt, nurseAppointmentTag) {
+					moq.AddPatient(mrn)
+					break
+				}
+			}
+		}
+	}
+	moq.Sort(p, "time", "asc")
+	return moq
+}
+
 type PatientLists struct {
 	Slices []PatientList `json:"slices"`
 }

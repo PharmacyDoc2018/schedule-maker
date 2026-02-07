@@ -39,7 +39,7 @@ func main() {
 
 	config.createPatientNameMap()
 
-	config.missingOrders = config.PatientList.FindMissingInfusionOrders()
+	config.missingOrders = config.PatientList.FindMissingInfusionAndRnInjOrders()
 
 	err = config.PullIgnoredOrdersList()
 	if err != nil {
