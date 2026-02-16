@@ -82,7 +82,7 @@ func homeCommandGetPrepullOrders(c *config) error {
 				visitType = "INF"
 				break
 			} else if strings.Contains(key, nurseAppointmentTag) {
-				visitType = "NURSE INJ"
+				visitType = "NURSE"
 				break
 			} else {
 				visitType = "CLINIC"
