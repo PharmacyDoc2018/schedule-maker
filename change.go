@@ -29,7 +29,8 @@ func homeCommandChangeApptTimeInf(c *config) error {
 
 	patient := c.PatientList.Map[mrn]
 	for key, val := range patient.AppointmentTimes {
-		if strings.Contains(key, infusionAppointmentTag) {
+		if strings.Contains(key, infusionAppointmentTag) ||
+			strings.Contains(key, nurseAppointmentTag) {
 			oldApptTime := val
 			newApptTime := time.Date(
 				oldApptTime.Year(),
@@ -76,7 +77,8 @@ func patientCommandChangeApptTimeInf(c *config) error {
 	patient := c.PatientList.Map[mrn]
 
 	for key, val := range patient.AppointmentTimes {
-		if strings.Contains(key, infusionAppointmentTag) {
+		if strings.Contains(key, infusionAppointmentTag) ||
+			strings.Contains(key, nurseAppointmentTag) {
 			oldApptTime := val
 			newApptTime := time.Date(
 				oldApptTime.Year(),
