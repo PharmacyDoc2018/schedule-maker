@@ -48,7 +48,8 @@ func homeCommandChangeApptTimeInf(c *config) error {
 			}
 
 			for key := range patient.AppointmentTimes {
-				if strings.Contains(key, infusionAppointmentTag) {
+				if strings.Contains(key, infusionAppointmentTag) ||
+					strings.Contains(key, nurseAppointmentTag) {
 					patient.AppointmentTimes[key] = newApptTime
 				}
 			}
@@ -96,7 +97,8 @@ func patientCommandChangeApptTimeInf(c *config) error {
 			}
 
 			for key := range patient.AppointmentTimes {
-				if strings.Contains(key, infusionAppointmentTag) {
+				if strings.Contains(key, infusionAppointmentTag) ||
+					strings.Contains(key, nurseAppointmentTag) {
 					patient.AppointmentTimes[key] = newApptTime
 				}
 			}
