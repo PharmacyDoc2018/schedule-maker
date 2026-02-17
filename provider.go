@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Providers struct {
@@ -41,6 +42,16 @@ func (p *Providers) List() []string {
 	}
 
 	return providerList
+}
+
+func (p *Providers) IsProviderAppt(appt string) (bool, string) {
+	for key := range p.Map {
+		if strings.Contains(appt, key) {
+			return true, key
+		}
+	}
+
+	return false, ""
 }
 
 func (c *config) saveProviders() error {

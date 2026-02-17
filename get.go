@@ -84,6 +84,45 @@ func homeCommandGetScheduleNurse(c *config) error {
 	return nil
 }
 
+func homeCommandGetScheduleClinic(c *config) error {
+	schedule := c.CreateClinicSchedule(c.PatientList)
+
+	schedule.colSpaceBuffer = 2
+
+	filters := []string{"defaultOrderFilter", "defaultPatientFilterDone"}
+	if len(c.lastInput) > 3 {
+		args := c.lastInput[3:]
+
+		for _, arg := range args {
+			switch arg {
+			case "--allOrders", "-ao":
+				for i := range filters {
+					if filters[i] == "defaultOrderFilter" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			case "--allPatients", "-ap":
+				for i := range filters {
+					if filters[i] == "defaultPatientFilterDone" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			default:
+				return fmt.Errorf("error: unknown filter %s", arg)
+			}
+		}
+
+	}
+
+	commandClear(c)
+	schedule.Print(c, filters)
+	return nil
+}
+
 func homeCommandGetNextMissingOrderPatient(c *config) error {
 	mrn, err := c.missingOrders.NextPatient()
 	if err != nil {

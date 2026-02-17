@@ -368,7 +368,10 @@ func commandGet(c *config) error {
 				}
 
 			case "clinic", "-c":
-				//homeCommandGetScheduleClinic()
+				err := homeCommandGetScheduleClinic(c)
+				if err != nil {
+					return err
+				}
 
 			case "nurse":
 				err := homeCommandGetScheduleNurse(c)
