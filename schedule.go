@@ -546,3 +546,69 @@ func (c *config) CreateClinicSchedule(ptList PatientList) Schedule {
 
 	return schedule
 }
+
+func (c *config) CreateProviderSchedule(ptList PatientList, name string) Schedule {
+	schedule := Schedule{}
+
+	type clinicAppt struct {
+		time   string
+		mrn    string
+		name   string
+		orders []string
+	}
+
+	clinicApptSlices := []clinicAppt{}
+	for _, patient := range ptList.Map {
+		for appt, apptTime := range patient.AppointmentTimes {
+			isClinicAppt, providerName := c.Providers.IsProviderAppt(appt)
+			if isClinicAppt && name == providerName {
+				ordersSlice := []string{}
+				for _, order := range patient.Orders {
+					ordersSlice = append(ordersSlice, order)
+				}
+				clinicApptSlices = append(clinicApptSlices, clinicAppt{
+					time:   apptTime.Format(timeFormat),
+					mrn:    patient.Mrn,
+					name:   patient.Name,
+					orders: ordersSlice,
+				})
+				break
+			}
+		}
+	}
+
+	sort.Slice(clinicApptSlices, func(i, j int) bool {
+		a, _ := time.Parse(timeFormat, clinicApptSlices[i].time)
+		b, _ := time.Parse(timeFormat, clinicApptSlices[j].time)
+		return a.Before(b)
+	})
+
+	for _, appt := range clinicApptSlices {
+		if len(appt.orders) > 0 {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				appt.orders[0],
+			})
+			for _, order := range appt.orders[1:] {
+				schedule.table = append(schedule.table, []string{
+					"",
+					"",
+					"",
+					order,
+				})
+			}
+		} else {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				"",
+			})
+		}
+
+	}
+
+	return schedule
+}

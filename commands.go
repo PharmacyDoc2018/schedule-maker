@@ -359,6 +359,7 @@ func commandGet(c *config) error {
 			if len(c.lastInput) < 3 {
 				return fmt.Errorf("error. missing schedule type")
 			}
+
 			secondArg := c.lastInput[2]
 			switch secondArg {
 			case "infusion", "-i", "inf":
@@ -380,7 +381,19 @@ func commandGet(c *config) error {
 				}
 
 			default:
-				return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
+				concatRemainingArgs := strings.Join(c.lastInput[2:], " ")
+				name, err := c.FindProviderInInput(2)
+				if err != nil {
+					return err
+				}
+				if c.Providers.Exists(name) {
+					err := homeCommandGetScheduleProvider(c, concatRemainingArgs)
+					if err != nil {
+						return err
+					}
+				} else {
+					return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
+				}
 			}
 
 		case "next":

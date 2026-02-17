@@ -91,6 +91,10 @@ func (c *config) readlineSetup() *readline.Instance {
 					readline.PcItem("allOrders"),
 					readline.PcItem("-ao"),
 				),
+				readline.PcItemDynamic(readlinePcDynamicItemHelper(c.Providers.List),
+					readline.PcItem("allOrders"),
+					readline.PcItem("-ao"),
+				),
 			),
 			readline.PcItem("prepullOrders"),
 			readline.PcItem("next",
@@ -456,6 +460,18 @@ func (c *config) FindPatientInInput(start int) (mrn string, err error) {
 	}
 	return "", fmt.Errorf("error. patient not found")
 
+}
+
+func (c *config) FindProviderInInput(start int) (string, error) {
+	i := start + 1
+	for i <= len(c.lastInput) {
+		potentialName := strings.Join(c.lastInput[start:i], " ")
+		if c.Providers.Exists(potentialName) {
+			return potentialName, nil
+		}
+		i++
+	}
+	return "", fmt.Errorf("error. provider not found")
 }
 
 func (c *config) FindPatientItemInInput(start int, itemType string) (mrn, ptName, item string, err error) {
