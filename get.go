@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func homeCommandGetScheduleInf(c *config) {
+func homeCommandGetScheduleInf(c *config) error {
 	schedule := c.CreateSchedule(c.PatientList)
 
 	schedule.colSpaceBuffer = 2
@@ -34,8 +34,7 @@ func homeCommandGetScheduleInf(c *config) {
 				}
 
 			default:
-				fmt.Printf("error: unknown filter %s\n", arg)
-				return
+				return fmt.Errorf("error: unknown filter %s", arg)
 			}
 		}
 
@@ -43,6 +42,46 @@ func homeCommandGetScheduleInf(c *config) {
 
 	commandClear(c)
 	schedule.Print(c, filters)
+	return nil
+}
+
+func homeCommandGetScheduleNurse(c *config) error {
+	schedule := c.CreateRNSchedule(c.PatientList)
+
+	schedule.colSpaceBuffer = 2
+
+	filters := []string{"defaultOrderFilter", "defaultPatientFilterDone"}
+	if len(c.lastInput) > 3 {
+		args := c.lastInput[3:]
+
+		for _, arg := range args {
+			switch arg {
+			case "--allOrders", "-ao":
+				for i := range filters {
+					if filters[i] == "defaultOrderFilter" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			case "--allPatients", "-ap":
+				for i := range filters {
+					if filters[i] == "defaultPatientFilterDone" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			default:
+				return fmt.Errorf("error: unknown filter %s", arg)
+			}
+		}
+
+	}
+
+	commandClear(c)
+	schedule.Print(c, filters)
+	return nil
 }
 
 func homeCommandGetNextMissingOrderPatient(c *config) error {

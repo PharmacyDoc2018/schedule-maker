@@ -334,10 +334,19 @@ func commandGet(c *config) error {
 			secondArg := c.lastInput[2]
 			switch secondArg {
 			case "infusion", "-i", "inf":
-				homeCommandGetScheduleInf(c)
+				err := homeCommandGetScheduleInf(c)
+				if err != nil {
+					return err
+				}
 
 			case "clinic", "-c":
 				//homeCommandGetScheduleClinic()
+
+			case "nurse":
+				err := homeCommandGetScheduleNurse(c)
+				if err != nil {
+					return err
+				}
 
 			default:
 				return fmt.Errorf("error. unknown schedule type: %s not found", secondArg)
