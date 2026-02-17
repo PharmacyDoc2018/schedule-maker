@@ -577,6 +577,12 @@ func commandRemove(c *config) error {
 				return err
 			}
 
+		case "provider":
+			err := homeCommandRemoveProvider(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("error. %s is not a removable element", firstArg)
 		}

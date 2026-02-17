@@ -33,6 +33,16 @@ func (p *Providers) Remove(name string) error {
 	return nil
 }
 
+func (p *Providers) List() []string {
+	providerList := []string{}
+
+	for key := range p.Map {
+		providerList = append(providerList, key)
+	}
+
+	return providerList
+}
+
 func (c *config) saveProviders() error {
 	data, err := json.Marshal(c.Providers)
 	if err != nil {

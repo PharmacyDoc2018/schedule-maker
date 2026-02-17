@@ -162,6 +162,23 @@ func homeCommandRemoveDone(c *config) error {
 	return nil
 }
 
+func homeCommandRemoveProvider(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. missing provider name")
+	}
+
+	name := strings.Join(c.lastInput[2:], " ")
+
+	err := c.Providers.Remove(name)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s removed from provider list", name)
+	return nil
+
+}
+
 func patientCommandRemoveOrder(c *config) error {
 	if len(c.lastInput) < 3 {
 		return fmt.Errorf("error. too few arguments.\nExpected format: remove order [pt name] [order name]")
