@@ -337,11 +337,18 @@ func (c *config) readlineLoopStartPreprocess() {
 
 	case Home:
 		var infusionPatientNum int
+		var nursePatientNum int
 		var remainingPatientNum int
 		for mrn := range c.PatientList.Map {
 			for appt := range c.PatientList.Map[mrn].AppointmentTimes {
 				if strings.Contains(appt, infusionAppointmentTag) {
 					infusionPatientNum++
+					if !c.PatientList.Map[mrn].VisitComplete {
+						remainingPatientNum++
+					}
+					break
+				} else if strings.Contains(appt, nurseAppointmentTag) {
+					nursePatientNum++
 					if !c.PatientList.Map[mrn].VisitComplete {
 						remainingPatientNum++
 					}
@@ -357,6 +364,10 @@ func (c *config) readlineLoopStartPreprocess() {
 		}
 
 		displayMessage += fmt.Sprintf("Infusion Patients(%d)", infusionPatientNum)
+
+		if nursePatientNum > 0 {
+			displayMessage += fmt.Sprintf(". Nurse Patients(%d)", nursePatientNum)
+		}
 
 		if c.missingOrders.Len() > 0 {
 			displayMessage += fmt.Sprintf(". Missing Orders(%d)", c.missingOrders.Len())
