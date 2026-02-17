@@ -18,6 +18,7 @@ func initREPL() *config {
 	pathToPrepullOrders := os.Getenv("PREPULL_ORDERS_PATH")
 	pathToIgnoredOrders := os.Getenv("IGNORED_ORDERS_PATH")
 	pathToPtSupplyOrders := os.Getenv("PT_SUPPLY_ORDERS_PATH")
+	pathToProviders := os.Getenv("PROVIDERS_PATH")
 
 	config := &config{
 		pathToSch:            pathToSch,
@@ -25,12 +26,14 @@ func initREPL() *config {
 		pathToIgnoredOrders:  pathToIgnoredOrders,
 		pathToPrepullOrders:  pathToPrepullOrders,
 		pathToPtSupplyOrders: pathToPtSupplyOrders,
+		pathToProviders:      pathToProviders,
 	}
 
 	config.commands = getCommands()
 
 	config.PatientList.Map = map[string]Patient{}
 	config.patientNameMap = map[string]struct{}{}
+	config.Providers.Map = map[string]struct{}{}
 	config.IgnoredOrders.Map = map[string]struct{}{}
 	config.PtSupplyOrders.Map = map[string]map[string]struct{}{}
 

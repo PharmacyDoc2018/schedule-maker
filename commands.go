@@ -166,14 +166,36 @@ func commandRestartNoSave(c *config) error {
 
 func commandSave(c *config) error {
 	fmt.Println("saving data...")
-	c.savePatientLists()
-	c.saveIgnoredOrdersList()
-	c.savePrepullOrdersList()
-	c.savePtSupplyOrderList()
+	err := c.savePatientLists()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = c.saveIgnoredOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = c.savePrepullOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = c.savePtSupplyOrderList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = c.saveProviders()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	fmt.Println("save complete!")
 	c.lastSave = time.Now()
 
 	return nil
+
 }
 
 func commandClear(c *config) error {

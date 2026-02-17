@@ -17,12 +17,14 @@ type config struct {
 	pathToIgnoredOrders  string
 	pathToPrepullOrders  string
 	pathToPtSupplyOrders string
+	pathToProviders      string
 	location             Location
 	IgnoredOrders        IgnoredOrders
 	PtSupplyOrders       PtSupplyOrders
 	PatientList          PatientList
 	PatientLists         PatientLists
 	patientNameMap       map[string]struct{}
+	Providers            Providers
 	commands             commandMapList
 	readlineConfig       *readline.Config
 	readlineCompleterMap map[int]*readline.PrefixCompleter
@@ -52,6 +54,11 @@ func main() {
 	}
 
 	err = config.PullPtSupplyOrdersList()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = config.PullProviders()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
