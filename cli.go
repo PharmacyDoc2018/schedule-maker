@@ -112,6 +112,7 @@ func (c *config) readlineSetup() *readline.Instance {
 			),
 			readline.PcItem("prepullOrder"),
 			readline.PcItem("patient"),
+			readline.PcItem("provider"),
 		),
 		readline.PcItem("mark",
 			readline.PcItem("done",

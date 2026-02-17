@@ -105,6 +105,23 @@ func homeCommandAddPatient(c *config) error {
 	return nil
 }
 
+func homeCommandAddProvider(c *config) error {
+	if len(c.lastInput) < 3 {
+		return fmt.Errorf("error. too few arguments.\nExpected format: add provider [name]")
+	}
+
+	name := strings.Join(c.lastInput[2:], " ")
+
+	err := c.Providers.Add(name)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s added as a provider\n", name)
+	return nil
+
+}
+
 func patientCommandAddOrder(c *config) error {
 	order := strings.Join(c.lastInput[2:], " ")
 	order = c.OrderPreprocessing(order) //-- swaps out dot phrases

@@ -318,6 +318,12 @@ func commandAdd(c *config) error {
 			c.createPatientNameMap()
 			commandSave(c)
 
+		case "provider":
+			err := homeCommandAddProvider(c)
+			if err != nil {
+				return err
+			}
+
 		default:
 			return fmt.Errorf("unknown item to add: %s not found", firstArg)
 		}
