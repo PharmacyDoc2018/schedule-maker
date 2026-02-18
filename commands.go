@@ -381,13 +381,9 @@ func commandGet(c *config) error {
 				}
 
 			default:
-				concatRemainingArgs := strings.Join(c.lastInput[2:], " ")
 				name, err := c.FindProviderInInput(2)
-				if err != nil {
-					return err
-				}
-				if c.Providers.Exists(name) {
-					err := homeCommandGetScheduleProvider(c, concatRemainingArgs)
+				if err == nil {
+					err = homeCommandGetScheduleProvider(c, name)
 					if err != nil {
 						return err
 					}

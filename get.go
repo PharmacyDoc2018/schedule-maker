@@ -129,8 +129,8 @@ func homeCommandGetScheduleProvider(c *config, name string) error {
 	schedule.colSpaceBuffer = 2
 
 	filters := []string{"defaultOrderFilter", "defaultPatientFilterDone"}
-	if len(c.lastInput) > 3 {
-		args := c.lastInput[3:]
+	if len(c.lastInput) > 2 {
+		args := c.lastInput[2:]
 
 		for _, arg := range args {
 			switch arg {

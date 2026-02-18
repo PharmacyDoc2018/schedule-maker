@@ -465,9 +465,10 @@ func (c *config) FindPatientInInput(start int) (mrn string, err error) {
 func (c *config) FindProviderInInput(start int) (string, error) {
 	i := start + 1
 	for i <= len(c.lastInput) {
-		potentialName := strings.Join(c.lastInput[start:i], " ")
-		if c.Providers.Exists(potentialName) {
-			return potentialName, nil
+		name := strings.Join(c.lastInput[start:i], " ")
+		if c.Providers.Exists(name) {
+			c.lastInput = append(c.lastInput[:start], c.lastInput[i:]...)
+			return name, nil
 		}
 		i++
 	}
