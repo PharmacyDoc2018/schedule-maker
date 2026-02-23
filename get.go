@@ -123,6 +123,54 @@ func homeCommandGetScheduleClinic(c *config) error {
 	return nil
 }
 
+func homeCommandGetScheduleClinicOnly(c *config) error {
+	filteredArgs := []string{}
+	for _, arg := range c.lastInput {
+		if arg == "only" {
+			continue
+		}
+		filteredArgs = append(filteredArgs, arg)
+	}
+	c.lastInput = filteredArgs
+
+	schedule := c.CreateClinicOnlySchedule(c.PatientList)
+
+	schedule.colSpaceBuffer = 2
+
+	filters := []string{"defaultOrderFilter", "defaultPatientFilterDone"}
+	if len(c.lastInput) > 3 {
+		args := c.lastInput[3:]
+
+		for _, arg := range args {
+			switch arg {
+			case "--allOrders", "-ao":
+				for i := range filters {
+					if filters[i] == "defaultOrderFilter" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			case "--allPatients", "-ap":
+				for i := range filters {
+					if filters[i] == "defaultPatientFilterDone" {
+						filters = append(filters[:i], filters[i+1:]...)
+						break
+					}
+				}
+
+			default:
+				return fmt.Errorf("error: unknown filter %s", arg)
+			}
+		}
+
+	}
+
+	commandClear(c)
+	schedule.Print(c, filters)
+	return nil
+}
+
 func homeCommandGetScheduleProvider(c *config, name string) error {
 	schedule := c.CreateProviderSchedule(c.PatientList, name)
 

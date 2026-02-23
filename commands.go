@@ -368,10 +368,30 @@ func commandGet(c *config) error {
 					return err
 				}
 
-			case "clinic", "-c":
-				err := homeCommandGetScheduleClinic(c)
-				if err != nil {
-					return err
+			case "clinic":
+				if len(c.lastInput) > 3 {
+					thirdArg := c.lastInput[3]
+					switch thirdArg {
+					case "only":
+						err := homeCommandGetScheduleClinicOnly(c)
+						if err != nil {
+							return err
+						}
+
+					case "-ao", "-ap", "--allOrders", "--allPatients":
+						err := homeCommandGetScheduleClinic(c)
+						if err != nil {
+							return err
+						}
+
+					default:
+						return fmt.Errorf("error. unknown argument %s", thirdArg)
+					}
+				} else {
+					err := homeCommandGetScheduleClinic(c)
+					if err != nil {
+						return err
+					}
 				}
 
 			case "nurse":
