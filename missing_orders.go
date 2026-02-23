@@ -67,6 +67,8 @@ func (m *missingOrdersQueue) Sort(p *PatientList, key, order string) error {
 					for appt, apptTime := range p.Map[m.queue[i]].AppointmentTimes {
 						if strings.Contains(appt, infusionAppointmentTag) {
 							return apptTime, nil
+						} else if strings.Contains(appt, nurseAppointmentTag) {
+							return apptTime, nil
 						}
 					}
 					return time.Time{}, fmt.Errorf("not found")
