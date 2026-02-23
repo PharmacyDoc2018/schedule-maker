@@ -7,7 +7,7 @@ import (
 )
 
 func homeCommandGetScheduleInf(c *config) error {
-	schedule := c.CreateSchedule(c.PatientList)
+	schedule := c.CreateInfSchedule(c.PatientList)
 
 	schedule.colSpaceBuffer = 2
 

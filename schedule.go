@@ -297,22 +297,26 @@ func (c *config) CreateSchedule(ptList PatientList) Schedule {
 
 	infApptSlices := []infAppt{}
 	for _, patient := range ptList.Map {
+		shownApptTime := time.Time{}
 		for appt, apptTime := range patient.AppointmentTimes {
 			if strings.Contains(appt, infusionAppointmentTag) ||
 				strings.Contains(appt, nurseAppointmentTag) {
-				ordersSlice := []string{}
-				for _, order := range patient.Orders {
-					ordersSlice = append(ordersSlice, order)
-				}
-				infApptSlices = append(infApptSlices, infAppt{
-					time:   apptTime.Format(timeFormat),
-					mrn:    patient.Mrn,
-					name:   patient.Name,
-					orders: ordersSlice,
-				})
-				break
+				shownApptTime = apptTime
+			} else if shownApptTime.IsZero() {
+				shownApptTime = apptTime
 			}
 		}
+		ordersSlice := []string{}
+		for _, order := range patient.Orders {
+			ordersSlice = append(ordersSlice, order)
+		}
+		infApptSlices = append(infApptSlices, infAppt{
+			time:   shownApptTime.Format(timeFormat),
+			mrn:    patient.Mrn,
+			name:   patient.Name,
+			orders: ordersSlice,
+		})
+
 	}
 
 	sort.Slice(infApptSlices, func(i, j int) bool {
@@ -364,7 +368,8 @@ func (c *config) CreateInfSchedule(ptList PatientList) Schedule {
 	infApptSlices := []infAppt{}
 	for _, patient := range ptList.Map {
 		for appt, apptTime := range patient.AppointmentTimes {
-			if strings.Contains(appt, infusionAppointmentTag) {
+			if strings.Contains(appt, infusionAppointmentTag) ||
+				strings.Contains(appt, nurseAppointmentTag) {
 				ordersSlice := []string{}
 				for _, order := range patient.Orders {
 					ordersSlice = append(ordersSlice, order)
@@ -508,6 +513,92 @@ func (c *config) CreateClinicSchedule(ptList PatientList) Schedule {
 				})
 				break
 			}
+		}
+	}
+
+	sort.Slice(clinicApptSlices, func(i, j int) bool {
+		a, _ := time.Parse(timeFormat, clinicApptSlices[i].time)
+		b, _ := time.Parse(timeFormat, clinicApptSlices[j].time)
+		return a.Before(b)
+	})
+
+	for _, appt := range clinicApptSlices {
+		if len(appt.orders) > 0 {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				appt.orders[0],
+			})
+			for _, order := range appt.orders[1:] {
+				schedule.table = append(schedule.table, []string{
+					"",
+					"",
+					"",
+					order,
+				})
+			}
+		} else {
+			schedule.table = append(schedule.table, []string{
+				appt.time,
+				appt.mrn,
+				appt.name,
+				"",
+			})
+		}
+
+	}
+
+	return schedule
+}
+
+func (c *config) CreateClinicOnlySchedule(ptList PatientList) Schedule {
+	// Clinic Only are patients who have a clinic appointment, but no
+	// infusion or nurse injection appointment.
+	schedule := Schedule{}
+
+	type clinicAppt struct {
+		time   string
+		mrn    string
+		name   string
+		orders []string
+	}
+
+	clinicApptSlices := []clinicAppt{}
+	for _, patient := range ptList.Map {
+		apptToAdd, err := func(patient Patient) (clinicAppt, error) {
+			clinicApptKey := ""
+			clinicApptTime := time.Time{}
+			for appt, apptTime := range patient.AppointmentTimes {
+				isClinicAppt, _ := c.Providers.IsProviderAppt(appt)
+				if isClinicAppt {
+					clinicApptKey = appt
+					clinicApptTime = apptTime
+				} else if strings.Contains(appt, infusionAppointmentTag) {
+					return clinicAppt{}, fmt.Errorf("inf appt")
+				} else if strings.Contains(appt, nurseAppointmentTag) {
+					return clinicAppt{}, fmt.Errorf("nurse appt")
+				}
+			}
+
+			if clinicApptKey == "" {
+				return clinicAppt{}, fmt.Errorf("no clinic appt found")
+			}
+
+			ordersSlice := []string{}
+			for _, order := range patient.Orders {
+				ordersSlice = append(ordersSlice, order)
+			}
+
+			return clinicAppt{
+				time:   clinicApptTime.Format(timeFormat),
+				mrn:    patient.Mrn,
+				name:   patient.Name,
+				orders: ordersSlice,
+			}, nil
+		}(patient)
+		if err == nil {
+			clinicApptSlices = append(clinicApptSlices, apptToAdd)
 		}
 	}
 
