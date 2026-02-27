@@ -140,7 +140,7 @@ func homeCommandChangePatientList(c *config) error {
 		if isSameDay(ptList.Date, ptListDate) {
 			commandSave(c)
 			c.PatientList = ptList
-			c.missingOrders = c.PatientList.FindMissingInfusionOrders()
+			c.missingOrders = c.PatientList.FindMissingInfusionAndRnInjOrders()
 			c.createPatientNameMap()
 			return nil
 		}
